@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,7 +12,7 @@
             background-color: #0f172a;
             background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 80%);
             color: #e2e8f0;
-            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; /* 强制使用中文字体 */
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -24,7 +24,6 @@
         h1 {
             font-weight: 200;
             letter-spacing: 4px;
-            text-transform: uppercase;
             margin-bottom: 10px;
             text-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
             text-align: center;
@@ -35,6 +34,7 @@
             font-size: 0.9em;
             margin-bottom: 30px;
             font-family: monospace;
+            letter-spacing: 1px;
         }
 
         /* 🔮 玻璃拟态面板 */
@@ -64,6 +64,7 @@
             padding: 5px 10px;
             border-radius: 20px;
             color: #4ade80;
+            border: 1px solid rgba(74, 222, 128, 0.2);
         }
 
         .dot {
@@ -80,36 +81,48 @@
             50% { opacity: 0.4; }
             100% { opacity: 1; }
         }
-
-        canvas {
-            width: 100% !important;
-            height: 100% !important;
+        
+        /* 移动端适配 */
+        @media (max-width: 600px) {
+            h1 { font-size: 1.5rem; letter-spacing: 1px; }
+            .subtitle { font-size: 0.7rem; }
+            .glass-panel { height: 50vh; }
         }
     </style>
 </head>
 <body>
 
-    <h1>Pentagon Pizza Index</h1>
-    <div class="subtitle">LIVE INTELLIGENCE DASHBOARD // ARLINGTON, VA</div>
+    <h1>五角大楼披萨指数</h1>
+    <div class="subtitle">实时情报仪表盘 // 弗吉尼亚州阿灵顿 (ARLINGTON, VA)</div>
 
     <div class="glass-panel">
         <div class="status-badge">
-            <div class="dot"></div> SYSTEM ONLINE
+            <div class="dot"></div> 系统运行中
         </div>
         <canvas id="pizzaChart"></canvas>
     </div>
 
     <script>
-        // 霓虹配色方案
+        // 🇨🇳 店名汉化映射表
+        const nameMap = {
+            "District Pizza Palace": "特区披萨宫 (深夜据点)",
+            "Domino's Pizza": "达美乐 (官方外卖)",
+            "Papa John's Pizza": "棒约翰 (侧翼补充)",
+            "Wiseguy Pizza": "Wiseguy (人流指标)",
+            "We": "We The Pizza (水晶城)",
+            "We, The Pizza": "We The Pizza (水晶城)"
+        };
+
+        // 🎨 霓虹配色方案
         const colors = {
             "District Pizza Palace": "#f43f5e", // 红
             "Domino's Pizza": "#0ea5e9",       // 蓝
             "Papa John's Pizza": "#d946ef",    // 紫
             "Wiseguy Pizza": "#eab308",        // 黄
-            "We": "#22c55e"                    // 绿
+            "We": "#22c55e",                   // 绿
+            "We, The Pizza": "#22c55e"
         };
 
-        // 读取 CSV
         Papa.parse("pizza_data.csv", {
             download: true,
             header: true,
@@ -120,34 +133,41 @@
         });
 
         function renderChart(data) {
-            // 数据处理
             const shops = {};
             const labelsSet = new Set();
 
             data.forEach(row => {
-                const time = row['Timestamp (ET)'].substring(5, 16); // 取 月-日 时:分
+                // 只要英文名存在，就尝试翻译成中文，找不到就用原名
+                const originalName = row.Name;
+                const displayName = nameMap[originalName] || originalName;
+                
+                // 处理时间 (只显示 月-日 时:分)
+                if (!row['Timestamp (ET)']) return;
+                const time = row['Timestamp (ET)'].substring(5, 16); 
                 labelsSet.add(time);
                 
-                if (!shops[row.Name]) shops[row.Name] = [];
-                shops[row.Name].push({ x: time, y: row['Live Popularity'] });
+                if (!shops[originalName]) shops[originalName] = [];
+                shops[originalName].push({ x: time, y: row['Live Popularity'] });
             });
 
             const labels = Array.from(labelsSet).sort();
             
-            const datasets = Object.keys(shops).map(name => ({
-                label: name,
-                data: labels.map(t => {
-                    const found = shops[name].find(d => d.x === t);
-                    return found ? found.y : null;
-                }),
-                borderColor: colors[name] || '#cbd5e1',
-                backgroundColor: (colors[name] || '#cbd5e1') + '10', // 透明背景
-                borderWidth: 2,
-                pointRadius: 3,
-                tension: 0.4 // 平滑曲线
-            }));
+            const datasets = Object.keys(shops).map(originalName => {
+                const displayName = nameMap[originalName] || originalName;
+                return {
+                    label: displayName, // 这里显示中文名
+                    data: labels.map(t => {
+                        const found = shops[originalName].find(d => d.x === t);
+                        return found ? found.y : null;
+                    }),
+                    borderColor: colors[originalName] || '#cbd5e1',
+                    backgroundColor: (colors[originalName] || '#cbd5e1') + '10',
+                    borderWidth: 2,
+                    pointRadius: 3,
+                    tension: 0.4
+                };
+            });
 
-            // 渲染图表
             const ctx = document.getElementById('pizzaChart').getContext('2d');
             new Chart(ctx, {
                 type: 'line',
@@ -155,8 +175,11 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    locale: 'zh-CN', // 设置图表语言环境
                     plugins: {
-                        legend: { labels: { color: '#94a3b8' } },
+                        legend: { 
+                            labels: { color: '#94a3b8', font: { family: "'Microsoft YaHei'" } } 
+                        },
                         tooltip: { 
                             mode: 'index', 
                             intersect: false,
