@@ -2,12 +2,13 @@ name: Pentagon Pizza Watch
 
 on:
   schedule:
-    # ⏰ 每4小时运行一次 (UTC时间 0, 4, 8, 12, 16, 20 点)
+    # ⏰ 每4小时运行一次 (UTC: 0, 4, 8...)
     - cron: '0 */4 * * *'
-  workflow_dispatch: # 保留手动测试按钮
+  workflow_dispatch: # 手动触发按钮
 
 permissions:
-  contents: write # 必须有写入权限才能保存数据
+  contents: write # 允许写代码(存CSV)
+  issues: write   # 允许发报警Issue
 
 jobs:
   spy-job:
@@ -27,6 +28,10 @@ jobs:
         pip install -r requirements.txt
 
     - name: Run Pizza Monitor
+      env:
+        # 🔑 注入两个密钥
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
       run: python monitor.py
 
     - name: Commit and Push Data
@@ -34,6 +39,5 @@ jobs:
         git config --global user.name "PizzaSpyBot"
         git config --global user.email "bot@example.com"
         git add pizza_data.csv
-        # 只有数据有变化时才提交
         git commit -m "Update Pizza Intelligence" || echo "No changes to commit"
         git push
