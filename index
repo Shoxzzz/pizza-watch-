@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <title>五角大楼披萨情报中心</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+    <style>
+        /* 🌑 全局背景：深邃的午夜蓝 */
+        body {
+            background-color: #0f172a; 
+            background-image: radial-gradient(circle at 50% 50%, #1e293b 0%, #0f172a 100%);
+            color: #e2e8f0;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            text-shadow: 0 0 10px rgba(56, 189, 248, 0.5);
+            margin-bottom: 30px;
+        }
+
+        /* 🔮 玻璃拟态卡片核心代码 */
+        .glass-panel {
+            background: rgba(30, 41, 59, 0.7); /* 半透明深色 */
+            backdrop-filter: blur(12px);       /* 毛玻璃模糊效果 */
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1); /* 微弱的白边框 */
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+            border-radius: 16px;
+            padding: 20px;
+            width: 90%;
+            max-width: 1000px;
+            margin-bottom: 20px;
+        }
+
+        .chart-container {
+            position: relative;
+            height: 50vh; /* 图表高度 */
+            width: 100%;
+        }
+
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.9em;
+            color: #94a3b8;
+            margin-top: 10px;
+        }
+
+        .live-indicator {
+            color: #4ade80; /* 绿色呼吸灯 */
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        
+        .live-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #4ade80;
+            border-radius: 50%;
+            box-shadow: 0 0 8px #4ade80;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.5; }
+            100% { opacity: 1; }
+        }
+    </style>
+</head>
+<body>
+
+    <h1>🍕 Pentagon Pizza Index</h1>
+
+    <div class="glass-panel">
+        <div class="chart-container">
+            <canvas id="pizzaChart"></canvas>
+        </div>
+        <div class="status-bar">
+            <span>数据源: Google Maps Live Data</span>
+            <div class="live-indicator"><div class="live-dot"></div>系统运行中</div>
+        </div>
+    </div>
+
+    <script>
+        // 配置：每家店对应的线条颜色 (霓虹配色)
+        const colors = {
+            "District Pizza Palace": "#ff0055", // 红色警戒 (核心)
+            "Domino's Pizza": "#00f2ff",       // 青色 (外卖)
+            "Papa John's Pizza": "#cc00ff",    // 紫色
+            "Wiseguy Pizza": "#ffe600",        // 黄色
+            "We": "#00ff9d"                    // 绿色
+        };
+
+        // 读取 CSV 数据
+        Papa.parse("pizza_data.csv", {
+            download: true,
+            header: true,
+            complete: function(results) {
+                processData(results.data);
+            }
+        });
+
+        function processData(data) {
+            // 1. 数据清洗与分组
+            const shops = {};
+            const timestamps = new Set();
+
+            data.forEach(row => {
+                if (!row.Name || !row.Timestamp) return;
+                
+                // 收集所有时间点（X轴）
+                // 截取时间字符串，只要 HH:MM 部分，看起来更简洁
+                const timeLabel = row['Timestamp (ET)'].substring(5, 16); 
+                timestamps.add(timeLabel);
+
+                // 按店名归类数据
+                if (!shops[row.Name]) {
+                    shops[row.Name] = [];
+                }
+                // 存入: {x: 时间, y: 热度}
+                shops[row.Name].push({
+                    x: timeLabel,
+                    y: parseInt(row['Live Popularity']) || 0
+                });
+            });
+
+            // 排序时间轴
+            const sortedLabels = Array.from(timestamps).sort();
+
+            // 2. 构建 Chart.js 数据集
+            const datasets = Object.keys(shops).map(shopName => {
+                // 匹配数据到正确的时间点（防止有的店缺数据导致错位）
+                const dataPoints = sortedLabels.map(label => {
+                    const found = shops[shopName].find(p => p.x === label);
+                    return found ? found.y : null;
+                });
+
+                return {
+                    label: shopName,
+                    data: dataPoints,
+                    borderColor: colors[shopName] || "#ffffff",
+                    backgroundColor: (colors[shopName] || "#ffffff") + "20", // 加一点透明度做背景
+                    borderWidth: 2,
+                    tension: 0.4, // 曲线平滑度
+                    pointRadius: 3,
+                    pointHoverRadius: 6
+                };
+            });
+
+            // 3. 渲染图表
+            const ctx = document.getElementById('pizzaChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: sortedLabels,
+                    datasets: datasets
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    plugins: {
+                        legend: {
+                            labels: { color: '#cbd5e1' }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                            titleColor: '#fff',
+                            bodyColor: '#fff',
+                            borderColor: 'rgba(255,255,255,0.1)',
+                            borderWidth: 1
+                        }
+                    },
+                    scales: {
+                        x: {
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        },
+                        y: {
+                            beginAtZero: true,
+                            max: 100, // 热度最高 100
+                            ticks: { color: '#94a3b8' },
+                            grid: { color: 'rgba(255,255,255,0.05)' }
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+</body>
+</html>
