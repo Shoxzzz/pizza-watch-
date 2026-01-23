@@ -2,13 +2,13 @@ name: Pentagon Pizza Watch
 
 on:
   schedule:
-    # ⏰ 每4小时运行一次 (UTC: 0, 4, 8...)
+    # 每4小时运行一次
     - cron: '0 */4 * * *'
-  workflow_dispatch: # 手动触发按钮
+  workflow_dispatch:
 
 permissions:
-  contents: write # 允许写代码(存CSV)
-  issues: write   # 允许发报警Issue
+  contents: write
+  issues: write
 
 jobs:
   spy-job:
@@ -29,7 +29,7 @@ jobs:
 
     - name: Run Pizza Monitor
       env:
-        # 🔑 注入两个密钥
+        # 👇 这一步就是把您刚才存的秘密传给代码
         GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
       run: python monitor.py
