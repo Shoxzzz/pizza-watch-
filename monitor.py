@@ -3,30 +3,28 @@ import csv
 import os
 import random
 import time
-import json
 import requests
 import subprocess
 from datetime import datetime
 import pytz
 
-# =================配置区域=================
 # 🎯 战略监测名单
 TARGETS = [
-    "District Pizza Palace, 2325 S Eads St, Arlington, VA",  # 深夜核心据点
-    "Domino's Pizza, 3535 South Ball St, Arlington, VA 22202", # 官方外卖主力
-    "Papa John's Pizza, 1014 S Glebe Rd, Arlington, VA 22204", # 侧翼补充
-    "Wiseguy Pizza, 710 12th St S, Arlington, VA 22202",       # 五角大楼城人流
-    "We, The Pizza, 2110 Crystal Dr, Arlington, VA 22202"      # 水晶城据点
+    "District Pizza Palace, 2325 S Eads St, Arlington, VA", 
+    "Domino's Pizza, 3535 South Ball St, Arlington, VA 22202",
+    "Papa John's Pizza, 1014 S Glebe Rd, Arlington, VA 22204",
+    "Wiseguy Pizza, 710 12th St S, Arlington, VA 22202",
+    "We, The Pizza, 2110 Crystal Dr, Arlington, VA 22202"
 ]
 
 FILENAME = 'pizza_data.csv'
-# =========================================
 
 def send_discord_alert(shop_name, popularity, time_str):
     """发送手机报警 (Discord)"""
     webhook_url = os.environ.get('DISCORD_WEBHOOK')
     if not webhook_url:
-        return # 没配 Webhook 就不发，静默处理
+        print("⚠️ No Discord Webhook configured.")
+        return
 
     data = {
         "content": "@everyone 🚨 **五角大楼情报警报** 🚨",
@@ -67,32 +65,32 @@ def run_spy():
         current_hour = dc_now.hour
         
         try:
-            # 🛑 防封机制：随机等待 10-25 秒
-            delay = random.randint(10, 25)
-            print(f"⏳ Waiting {delay}s...")
+            # 防封机制：随机等待
+            delay = random.randint(10, 20)
             time.sleep(delay)
 
-            # 抓取数据
             data = livepopulartimes.get_populartimes_by_address(place)
             name = data.get('name', place).split(",")[0]
             current_pop = data.get('current_popularity', 0) or 0
             rating = data.get('rating', 0)
             
-            print(f"📍 Checking {name}: Pop {current_pop} at Hour {current_hour}")
+            print(f"📍 {name} | Pop: {current_pop} | Hour: {current_hour}")
 
             # ==========================
-            # 🚨 报警逻辑 (Alert Logic)
+            # 🚨 报警逻辑
             # ==========================
-            # 条件: 深夜 (22:00-05:00) 且 热度 > 40
+            # 这里的逻辑是：深夜(22点-5点) 且 热度>40 就报警
             is_night = (current_hour >= 22 or current_hour <= 5)
             is_busy = (current_pop > 40) 
+
+            # 👇 如果您想现在立刻测试报警，把下面这行前面的 # 去掉，并把上面两行注释掉：
+            # if True: 
 
             if is_night and is_busy:
                 print(f"🔥 ANOMALY DETECTED: {name}")
                 send_github_alert(name, current_pop, now_str)
                 send_discord_alert(name, current_pop, now_str)
-            # ==========================
-
+            
             # 写入 CSV
             file_exists = os.path.isfile(FILENAME)
             with open(FILENAME, 'a', newline='', encoding='utf-8-sig') as f:
