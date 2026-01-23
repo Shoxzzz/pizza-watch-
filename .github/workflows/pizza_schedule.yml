@@ -2,12 +2,12 @@ name: Pentagon Pizza Watch
 
 on:
   schedule:
-    # 0 */4 * * * 表示每4小时运行一次 (0点, 4点, 8点, 12点...)
+    # ⏰ 每4小时运行一次 (UTC时间 0, 4, 8, 12, 16, 20 点)
     - cron: '0 */4 * * *'
-  workflow_dispatch: 
+  workflow_dispatch: # 保留手动测试按钮
 
 permissions:
-  contents: write 
+  contents: write # 必须有写入权限才能保存数据
 
 jobs:
   spy-job:
@@ -34,5 +34,6 @@ jobs:
         git config --global user.name "PizzaSpyBot"
         git config --global user.email "bot@example.com"
         git add pizza_data.csv
-        git commit -m "Update Pizza Index data" || echo "No changes to commit"
+        # 只有数据有变化时才提交
+        git commit -m "Update Pizza Intelligence" || echo "No changes to commit"
         git push
