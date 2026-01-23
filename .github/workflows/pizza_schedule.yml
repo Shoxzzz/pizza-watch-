@@ -1,0 +1,38 @@
+name: Pentagon Pizza Watch
+
+on:
+  schedule:
+    # 0 */4 * * * 表示每4小时运行一次 (0点, 4点, 8点, 12点...)
+    - cron: '0 */4 * * *'
+  workflow_dispatch: 
+
+permissions:
+  contents: write 
+
+jobs:
+  spy-job:
+    runs-on: ubuntu-latest
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install dependencies
+      run: |
+        pip install -r requirements.txt
+
+    - name: Run Pizza Monitor
+      run: python monitor.py
+
+    - name: Commit and Push Data
+      run: |
+        git config --global user.name "PizzaSpyBot"
+        git config --global user.email "bot@example.com"
+        git add pizza_data.csv
+        git commit -m "Update Pizza Index data" || echo "No changes to commit"
+        git push
