@@ -2,203 +2,179 @@
 <html lang="zh-CN">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>五角大楼披萨情报局</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        /* 🌑 全局背景：深空蓝 */
+        :root {
+            --bg-dark: #0f172a;
+            --neon-blue: #38bdf8;
+            --neon-green: #4ade80;
+        }
         body {
-            background-color: #0f172a;
-            background-image: radial-gradient(circle at 50% 0%, #1e293b 0%, #0f172a 80%);
+            background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at top center, #1e293b 0%, #0f172a 70%);
             color: #e2e8f0;
-            font-family: 'Microsoft YaHei', 'PingFang SC', sans-serif; /* 强制使用中文字体 */
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", sans-serif;
+            margin: 0;
+            padding: 20px 15px;
             display: flex;
             flex-direction: column;
             align-items: center;
             min-height: 100vh;
-            margin: 0;
-            padding: 20px;
+            box-sizing: border-box;
         }
 
+        /* 标题区域 */
+        header { text-align: center; margin-bottom: 20px; margin-top: 10px; }
         h1 {
-            font-weight: 200;
-            letter-spacing: 4px;
-            margin-bottom: 10px;
+            font-weight: 300; letter-spacing: 1px; margin: 0;
+            font-size: 1.6rem;
             text-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
-            text-align: center;
         }
-
         .subtitle {
-            color: #94a3b8;
-            font-size: 0.9em;
-            margin-bottom: 30px;
-            font-family: monospace;
-            letter-spacing: 1px;
+            color: #94a3b8; font-size: 0.75rem; font-family: monospace; opacity: 0.8; margin-top: 5px; display: block;
         }
 
-        /* 🔮 玻璃拟态面板 */
+        /* 玻璃面板 */
         .glass-panel {
-            background: rgba(30, 41, 59, 0.4);
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
-            border-radius: 24px;
-            padding: 20px;
-            width: 95%;
-            max-width: 1100px;
-            height: 60vh; /* 图表高度 */
+            background: rgba(30, 41, 59, 0.6);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 20px;
+            padding: 15px;
+            width: 100%;
+            flex-grow: 1; /* 让面板占满剩余空间 */
+            max-height: 80vh; /* 防止太长 */
+            display: flex;
+            flex-direction: column;
             position: relative;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
         }
 
+        /* 状态灯 (绝对定位，放到左上角避免遮挡) */
         .status-badge {
             position: absolute;
-            top: 20px;
-            right: 20px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 0.8em;
-            background: rgba(0, 0, 0, 0.3);
-            padding: 5px 10px;
-            border-radius: 20px;
-            color: #4ade80;
+            top: -35px; /* 移出面板，放在标题旁边 */
+            right: 0;
+            display: flex; align-items: center; gap: 6px;
+            font-size: 0.7rem; color: var(--neon-green);
+            background: rgba(15, 23, 42, 0.8);
+            padding: 4px 8px; border-radius: 12px;
             border: 1px solid rgba(74, 222, 128, 0.2);
         }
-
         .dot {
-            width: 8px;
-            height: 8px;
-            background-color: #4ade80;
-            border-radius: 50%;
-            box-shadow: 0 0 8px #4ade80;
+            width: 6px; height: 6px; background-color: var(--neon-green);
+            border-radius: 50%; box-shadow: 0 0 6px var(--neon-green);
             animation: pulse 2s infinite;
         }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        @keyframes pulse {
-            0% { opacity: 1; }
-            50% { opacity: 0.4; }
-            100% { opacity: 1; }
-        }
-        
-        /* 移动端适配 */
-        @media (max-width: 600px) {
-            h1 { font-size: 1.5rem; letter-spacing: 1px; }
-            .subtitle { font-size: 0.7rem; }
-            .glass-panel { height: 50vh; }
+        /* 图表容器 */
+        .chart-wrapper {
+            flex: 1;
+            position: relative;
+            width: 100%;
+            min-height: 300px; /* 保证在手机上不会被压扁 */
         }
     </style>
 </head>
 <body>
 
-    <h1>五角大楼披萨指数</h1>
-    <div class="subtitle">实时情报仪表盘 // 弗吉尼亚州阿灵顿 (ARLINGTON, VA)</div>
+    <header>
+        <div style="position: relative; display: inline-block; width: 100%;">
+            <h1>五角大楼指数</h1>
+            <div class="status-badge"><div class="dot"></div> 系统在线</div>
+        </div>
+        <span class="subtitle">LIVE INTELLIGENCE // VA, USA</span>
+    </header>
 
     <div class="glass-panel">
-        <div class="status-badge">
-            <div class="dot"></div> 系统运行中
+        <div class="chart-wrapper">
+            <canvas id="pizzaChart"></canvas>
         </div>
-        <canvas id="pizzaChart"></canvas>
     </div>
 
     <script>
-        // 🇨🇳 店名汉化映射表
-        const nameMap = {
-            "District Pizza Palace": "特区披萨宫 (深夜据点)",
-            "Domino's Pizza": "达美乐 (官方外卖)",
-            "Papa John's Pizza": "棒约翰 (侧翼补充)",
-            "Wiseguy Pizza": "Wiseguy (人流指标)",
-            "We": "We The Pizza (水晶城)",
-            "We, The Pizza": "We The Pizza (水晶城)"
-        };
+        // 配置：针对手机优化的图表参数
+        const isMobile = window.innerWidth < 600;
 
-        // 🎨 霓虹配色方案
+        const nameMap = {
+            "District Pizza Palace": "特区披萨 (核心)",
+            "Domino's Pizza": "达美乐",
+            "Papa John's Pizza": "棒约翰",
+            "Wiseguy Pizza": "Wiseguy",
+            "We": "We Pizza",
+            "We, The Pizza": "We Pizza"
+        };
         const colors = {
-            "District Pizza Palace": "#f43f5e", // 红
-            "Domino's Pizza": "#0ea5e9",       // 蓝
-            "Papa John's Pizza": "#d946ef",    // 紫
-            "Wiseguy Pizza": "#eab308",        // 黄
-            "We": "#22c55e",                   // 绿
-            "We, The Pizza": "#22c55e"
+            "District Pizza Palace": "#ff3366", 
+            "Domino's Pizza": "#00e5ff",       
+            "Papa John's Pizza": "#bf5af2",    
+            "Wiseguy Pizza": "#ffd60a",        
+            "We": "#32d74b",
+            "We, The Pizza": "#32d74b"
         };
 
         Papa.parse("pizza_data.csv", {
-            download: true,
-            header: true,
-            skipEmptyLines: true,
-            complete: function(results) {
-                renderChart(results.data);
-            }
+            download: true, header: true, skipEmptyLines: true,
+            complete: results => renderChart(results.data)
         });
 
         function renderChart(data) {
-            const shops = {};
-            const labelsSet = new Set();
-
+            const shops = {}; const labelsSet = new Set();
             data.forEach(row => {
-                // 只要英文名存在，就尝试翻译成中文，找不到就用原名
-                const originalName = row.Name;
-                const displayName = nameMap[originalName] || originalName;
-                
-                // 处理时间 (只显示 月-日 时:分)
                 if (!row['Timestamp (ET)']) return;
-                const time = row['Timestamp (ET)'].substring(5, 16); 
-                labelsSet.add(time);
+                // 手机上只显示时间 "18:00"，不显示日期，节省空间
+                const timeStr = row['Timestamp (ET)'];
+                const timeLabel = isMobile ? timeStr.substring(11, 16) : timeStr.substring(5, 16);
                 
-                if (!shops[originalName]) shops[originalName] = [];
-                shops[originalName].push({ x: time, y: row['Live Popularity'] });
+                labelsSet.add(timeLabel);
+                const name = row.Name;
+                if (!shops[name]) shops[name] = [];
+                shops[name].push({ x: timeLabel, y: row['Live Popularity'] });
             });
 
             const labels = Array.from(labelsSet).sort();
-            
-            const datasets = Object.keys(shops).map(originalName => {
-                const displayName = nameMap[originalName] || originalName;
-                return {
-                    label: displayName, // 这里显示中文名
-                    data: labels.map(t => {
-                        const found = shops[originalName].find(d => d.x === t);
-                        return found ? found.y : null;
-                    }),
-                    borderColor: colors[originalName] || '#cbd5e1',
-                    backgroundColor: (colors[originalName] || '#cbd5e1') + '10',
-                    borderWidth: 2,
-                    pointRadius: 3,
-                    tension: 0.4
-                };
-            });
+            const datasets = Object.keys(shops).map(name => ({
+                label: nameMap[name] || name,
+                data: labels.map(t => shops[name].find(d => d.x === t)?.y || null),
+                borderColor: colors[name] || '#ccc',
+                backgroundColor: (colors[name] || '#ccc') + '10',
+                borderWidth: 2,
+                pointRadius: isMobile ? 2 : 3, // 手机上点小一点
+                tension: 0.3
+            }));
 
-            const ctx = document.getElementById('pizzaChart').getContext('2d');
-            new Chart(ctx, {
+            new Chart(document.getElementById('pizzaChart'), {
                 type: 'line',
                 data: { labels, datasets },
                 options: {
                     responsive: true,
-                    maintainAspectRatio: false,
-                    locale: 'zh-CN', // 设置图表语言环境
+                    maintainAspectRatio: false, // 关键：允许拉伸高度
+                    interaction: { mode: 'index', intersect: false },
                     plugins: {
                         legend: { 
-                            labels: { color: '#94a3b8', font: { family: "'Microsoft YaHei'" } } 
+                            position: 'bottom', // 关键：图例放到底部！
+                            labels: { 
+                                color: '#94a3b8', 
+                                boxWidth: 10,
+                                font: { size: 11 }
+                            }
                         },
-                        tooltip: { 
-                            mode: 'index', 
-                            intersect: false,
-                            backgroundColor: 'rgba(15, 23, 42, 0.9)',
-                            titleColor: '#f1f5f9',
-                            bodyColor: '#cbd5e1',
-                            borderColor: 'rgba(255,255,255,0.1)',
-                            borderWidth: 1
-                        }
+                        tooltip: { enabled: true }
                     },
                     scales: {
                         x: { 
                             grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#64748b' }
+                            ticks: { color: '#64748b', maxRotation: 0, font: {size: 10} }
                         },
                         y: { 
                             grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#64748b' },
-                            suggestedMax: 100
+                            beginAtZero: true, suggestedMax: 100,
+                            ticks: { color: '#64748b' }
                         }
                     }
                 }
