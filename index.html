@@ -29,7 +29,6 @@
             -webkit-overflow-scrolling: touch;
         }
 
-        /* 顶部导航 */
         .header {
             padding: 16px 20px;
             background: rgba(10, 10, 10, 0.95);
@@ -50,65 +49,50 @@
 
         .container { padding: 15px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 80px; }
 
-        /* 🔥 新增：总指挥仪表盘 */
-        .dashboard-grid {
-            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
-            margin-bottom: 5px;
-        }
+        /* 总仪表盘 */
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 5px; }
         .dash-card {
-            background: var(--dash-bg);
-            border: 1px solid #333;
-            border-radius: 12px;
-            padding: 15px;
-            display: flex; flex-direction: column; justify-content: center;
+            background: var(--dash-bg); border: 1px solid #333; border-radius: 12px;
+            padding: 15px; display: flex; flex-direction: column; justify-content: center;
             position: relative; overflow: hidden;
         }
-        /* 仪表盘背景光效 */
         .dash-glow {
             position: absolute; top: -50%; right: -50%; width: 100%; height: 200%;
-            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
-            pointer-events: none;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%); pointer-events: none;
         }
         .dash-lbl { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; margin-bottom: 4px; }
         .dash-val { font-size: 26px; font-weight: 900; line-height: 1; }
         .dash-sub { font-size: 11px; margin-top: 4px; font-weight: 500; }
 
-        /* 分店战术卡片 */
-        .card {
-            background: var(--card-bg);
-            border: 1px solid #2a2a2a;
-            border-radius: 12px;
-            padding: 16px;
-            display: flex; flex-direction: column; gap: 12px;
-        }
-
+        /* 战术卡片 */
+        .card { background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
         .row-top { display: flex; justify-content: space-between; align-items: flex-start; }
         .shop-name { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 2px; }
         .shop-desc { font-size: 11px; color: var(--sub-text); }
         .big-score { font-size: 28px; font-weight: 900; line-height: 1; letter-spacing: -1px; }
 
-        .row-stats { 
-            display: flex; gap: 10px; 
-            padding: 10px; background: #080808; border-radius: 8px; 
-            border: 1px solid #222;
-        }
+        .row-stats { display: flex; gap: 10px; padding: 10px; background: #080808; border-radius: 8px; border: 1px solid #222; }
         .stat-box { flex: 1; display: flex; flex-direction: column; gap: 2px; }
         .stat-lbl { font-size: 10px; color: #555; }
         .stat-val { font-size: 13px; font-weight: 700; }
 
-        .spark-container {
-            display: flex; align-items: flex-end; gap: 2px;
-            height: 30px; 
-            margin-top: 5px;
-            padding-top: 10px;
-            border-top: 1px dashed #222;
-        }
+        .spark-container { display: flex; align-items: flex-end; gap: 2px; height: 30px; margin-top: 5px; padding-top: 10px; border-top: 1px dashed #222; }
         .spark-bar { flex: 1; background: #333; border-radius: 2px; min-height: 2px; }
 
+        /* 🔥 新增：底部说明书样式 */
+        .guide-card {
+            background: #080808; border: 1px solid #222; border-radius: 12px; padding: 15px;
+            margin-top: 10px; display: flex; flex-direction: column; gap: 10px;
+        }
+        .guide-title { font-size: 12px; font-weight: bold; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; border-bottom: 1px solid #222; padding-bottom: 8px; }
+        .guide-row { display: flex; align-items: center; gap: 10px; font-size: 11px; color: #ccc; }
+        .guide-icon { width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 4px; }
+        .g-bar { width: 4px; height: 12px; background: #333; border-radius: 2px; }
+        .g-bar-red { background: var(--danger); }
+        
         .c-red { color: var(--danger); }
         .c-green { color: var(--safe); }
         .c-gray { color: #888; }
-        
         .loading { text-align: center; margin-top: 50px; color: #444; font-size: 12px; }
     </style>
 </head>
@@ -123,8 +107,44 @@
         <div id="dash-area"></div>
         
         <div id="list-area">
-            <div class="loading">正在汇总各分部数据...</div>
+            <div class="loading">正在解密卫星数据流...</div>
         </div>
+
+        <div class="guide-card">
+            <div class="guide-title">情报解读指南 (INTEL GUIDE)</div>
+            
+            <div class="guide-row">
+                <div class="guide-icon" style="gap:2px">
+                    <div class="g-bar"></div><div class="g-bar"></div><div class="g-bar g-bar-red"></div>
+                </div>
+                <div>
+                    <span style="color:#fff; font-weight:bold;">迷你走势图</span>：从左到右代表 过去 → 现在
+                </div>
+            </div>
+
+            <div class="guide-row">
+                <div class="guide-icon"><div class="g-bar g-bar-red"></div></div>
+                <div>
+                    <span style="color:var(--danger)">红色柱子</span>：代表该小时热度 > 50 (高威胁)
+                </div>
+            </div>
+
+            <div class="guide-row">
+                <div class="guide-icon" style="color:var(--danger)">▲</div>
+                <div>
+                    <span style="color:#fff">1H 变化</span>：对比 1 小时前的人流增减
+                </div>
+            </div>
+
+            <div class="guide-row">
+                <div class="guide-icon" style="color:#fff">24H</div>
+                <div>
+                    <span style="color:#fff">24H 峰值</span>：过去一整天的最高纪录
+                </div>
+            </div>
+        </div>
+        
+        <div style="text-align:center; font-size:10px; color:#333; margin-top:5px;">PENTAGON OPS V21 // MANUAL INCLUDED</div>
     </div>
 
     <script>
@@ -168,13 +188,10 @@
                 }
             });
 
-            // --- 🧮 1. 全局数据计算 ---
-            let totalLivePop = 0; // 当前全网总人数
-            let totalDiff = 0;    // 当前全网 1小时 变化量
-            let sortedKeys = [];
-
-            // 先预处理所有店，算出总数，顺便准备排序
+            let totalLivePop = 0; 
+            let totalDiff = 0;    
             const shopDataList = [];
+            
             Object.keys(groups).forEach(key => {
                 const history = groups[key];
                 if(history.length === 0) return;
@@ -182,32 +199,25 @@
                 const current = history[history.length - 1];
                 const currentPop = current.pop;
 
-                // 计算单店变化
                 let diff = 0;
                 if(history.length >= 2) {
                     diff = currentPop - history[history.length - 2].pop;
                 }
 
-                // 累加到总数
                 totalLivePop += currentPop;
                 totalDiff += diff;
 
                 shopDataList.push({ key, history, currentPop, diff, current });
             });
 
-            // 按热度降序排序
             shopDataList.sort((a, b) => b.currentPop - a.currentPop);
 
-            // --- 🎨 2. 渲染顶部总仪表盘 (Dashboard) ---
+            // 渲染仪表盘
             const dashArea = document.getElementById('dash-area');
-            
-            // 总变化的颜色逻辑
             let diffColor = "#888"; 
             let diffArrow = "-";
             if(totalDiff > 0) { diffColor = "var(--danger)"; diffArrow = "▲ +"; }
             else if(totalDiff < 0) { diffColor = "var(--safe)"; diffArrow = "▼ "; }
-
-            // 总热度如果太高，显示红色
             let totalColor = totalLivePop > 150 ? "var(--danger)" : "#fff";
 
             dashArea.innerHTML = `
@@ -227,7 +237,7 @@
                 </div>
             `;
 
-            // --- 🎨 3. 渲染分店列表 ---
+            // 渲染列表
             const listArea = document.getElementById('list-area');
             listArea.innerHTML = ""; 
 
@@ -235,16 +245,13 @@
                 const { key, history, currentPop, diff, current } = item;
                 const conf = DICT[key];
 
-                // 单店变化显示
                 let diffHtml = `<span class="c-gray">--</span>`;
                 if(diff > 0) diffHtml = `<span class="c-red">▲ +${diff}</span>`;
                 else if(diff < 0) diffHtml = `<span class="c-green">▼ ${diff}</span>`;
 
-                // 24H 峰值
                 const last24 = history.slice(-24);
                 const maxPop = Math.max(...last24.map(i => i.pop));
 
-                // 迷你柱状图
                 const sparkData = history.slice(-20); 
                 let barsHtml = "";
                 sparkData.forEach((d, idx) => {
@@ -282,8 +289,6 @@
                 </div>
                 `;
             });
-            
-            listArea.innerHTML += `<div style="text-align:center; font-size:10px; color:#333; margin-top:10px;">PENTAGON OPS V20 // GLOBAL VIEW</div>`;
         }
     </script>
 </body>
