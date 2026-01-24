@@ -3,148 +3,51 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PENTAGON V9</title>
+    <title>PENTAGON OPS FINAL</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        :root {
-            --bg: #000000;
-            --card: #121212;
-            --text-main: #ffffff;
-            --text-sub: #888888;
-            --accent: #2997ff; /* iOS Blue */
-            --danger: #ff453a; /* iOS Red */
-            --success: #30d158; /* iOS Green */
-        }
+        :root { --bg: #000; --card: #121212; --text: #fff; --sub: #888; --danger: #ff453a; --success: #30d158; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+        .header { padding: 12px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid #222; }
+        .brand { font-weight: 700; font-size: 16px; }
+        .live { color: var(--success); font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        .dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: p 1s infinite; } @keyframes p { 50% { opacity: 0.3; } }
         
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        .kpi-scroll { display: flex; gap: 10px; padding: 15px 20px; overflow-x: auto; flex-shrink: 0; }
+        .card { background: var(--card); border: 1px solid #333; border-radius: 10px; padding: 10px 15px; min-width: 100px; }
+        .lbl { font-size: 10px; color: var(--sub); text-transform: uppercase; margin-bottom: 5px; }
+        .val { font-size: 22px; font-weight: 700; }
 
-        body {
-            background-color: var(--bg);
-            color: var(--text-main);
-            font-family: 'Inter', -apple-system, sans-serif;
-            margin: 0; padding: 0;
-            height: 100vh;
-            display: flex; flex-direction: column;
-            overflow: hidden;
-            padding-top: env(safe-area-inset-top); /* 避开刘海 */
-            padding-bottom: env(safe-area-inset-bottom); /* 避开底部横条 */
-        }
-
-        /* 1. 顶部标题 */
-        .header {
-            padding: 12px 20px;
-            display: flex; justify-content: space-between; align-items: center;
-            border-bottom: 1px solid #222;
-        }
-        .brand { font-size: 16px; font-weight: 700; letter-spacing: -0.5px; }
-        .live-badge {
-            font-size: 11px; color: var(--success); font-weight: 600;
-            background: rgba(48, 209, 88, 0.1); padding: 4px 10px; border-radius: 100px;
-            display: flex; align-items: center; gap: 6px;
-        }
-        .dot { width: 6px; height: 6px; background: currentColor; border-radius: 50%; animation: pulse 2s infinite; }
-        @keyframes pulse { 50% { opacity: 0.3; } }
-
-        /* 2. 修复点：KPI 滑动轨道 (像 App Store 那样) */
-        .kpi-scroll-view {
-            display: flex;
-            gap: 12px;
-            padding: 16px 20px;
-            overflow-x: auto; /* 允许横向滑动 */
-            scroll-behavior: smooth;
-            -webkit-overflow-scrolling: touch; /* iOS 丝滑滚动 */
-            flex-shrink: 0; /* 防止被挤压 */
-        }
-        /* 隐藏滚动条 */
-        .kpi-scroll-view::-webkit-scrollbar { display: none; }
-        
-        .kpi-card {
-            background: var(--card);
-            border: 1px solid #222;
-            border-radius: 12px;
-            padding: 12px 16px;
-            min-width: 110px; /* 固定最小宽度，确保不换行 */
-            display: flex; flex-direction: column; justify-content: center;
-        }
-        .kpi-label { font-size: 10px; color: var(--text-sub); text-transform: uppercase; margin-bottom: 4px; font-weight: 600; }
-        .kpi-val { font-size: 20px; font-weight: 700; letter-spacing: -0.5px; }
-
-        /* 3. 图表区 (自适应填充) */
-        .chart-wrapper {
-            flex: 1; /* 占满剩余空间 */
-            position: relative;
-            margin: 0 10px;
-            background: rgba(255,255,255,0.03);
-            border-radius: 16px;
-        }
-
-        /* 4. 底部图例 (也是滑动的) */
-        .legend-bar {
-            padding: 16px 20px;
-            display: flex; gap: 10px;
-            overflow-x: auto;
-            border-top: 1px solid #222;
-            flex-shrink: 0;
-        }
-        .legend-bar::-webkit-scrollbar { display: none; }
-
-        .pill {
-            background: #1a1a1a;
-            padding: 6px 12px; border-radius: 8px;
-            font-size: 11px; font-weight: 500; color: #ccc;
-            white-space: nowrap;
-            display: flex; align-items: center; gap: 6px;
-            border: 1px solid #333;
-        }
-        .color-block { width: 3px; height: 12px; border-radius: 2px; }
-
+        .chart-wrap { flex: 1; margin: 0 10px; background: #080808; border-radius: 15px; position: relative; }
+        .leg-bar { padding: 15px 20px; display: flex; gap: 8px; overflow-x: auto; border-top: 1px solid #222; flex-shrink: 0; }
+        .pill { background: #1a1a1a; padding: 5px 10px; border-radius: 6px; font-size: 11px; color: #ccc; white-space: nowrap; border-left: 3px solid transparent; }
     </style>
 </head>
 <body>
-
     <div class="header">
-        <div class="brand">PENTAGON V9</div>
-        <div class="live-badge"><div class="dot"></div>LIVE</div>
+        <div class="brand">PENTAGON V10</div>
+        <div class="live"><div class="dot"></div>SYNCED</div>
     </div>
 
-    <div class="kpi-scroll-view">
-        <div class="kpi-card">
-            <div class="kpi-label">Max Peak</div>
-            <div class="kpi-val" id="val-max">--</div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-label">Threat Level</div>
-            <div class="kpi-val" id="val-level" style="color:var(--success)">LOW</div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-label">Active Spots</div>
-            <div class="kpi-val">5</div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-label">Status</div>
-            <div class="kpi-val" style="color:var(--accent)">SYNCED</div>
-        </div>
+    <div class="kpi-scroll">
+        <div class="card"><div class="lbl">Max Peak</div><div class="val" id="v-max">--</div></div>
+        <div class="card"><div class="lbl">Status</div><div class="val" id="v-stat" style="color:var(--success)">LOW</div></div>
+        <div class="card"><div class="lbl">Points</div><div class="val" id="v-pts">0</div></div>
     </div>
 
-    <div class="chart-wrapper">
-        <canvas id="mainChart"></canvas>
-    </div>
-
-    <div class="legend-bar" id="legend-container"></div>
+    <div class="chart-wrap"><canvas id="C"></canvas></div>
+    <div class="leg-bar" id="Leg"></div>
 
     <script>
-        // 🔥 V9 核心逻辑：强制切片，拒绝乱码
-        const MAX_POINTS = 15;
-
-        const config = {
-            "District Pizza Palace": { c: "#ff453a", n: "特区披萨" },
-            "Domino's Pizza":        { c: "#0a84ff", n: "达美乐" },
-            "Papa John's Pizza":     { c: "#bf5af2", n: "棒约翰" },
-            "Wiseguy Pizza":         { c: "#ffd60a", n: "Wiseguy" },
-            "We":                    { c: "#30d158", n: "We Pizza" },
-            "We, The Pizza":         { c: "#30d158", n: "We Pizza" }
+        // ⚡️ 这里是中文显示的命根子！必须和Python的 Key 完全一致
+        const CFG = {
+            "District": { c: "#ff453a", n: "特区披萨" },
+            "Dominos":  { c: "#0a84ff", n: "达美乐" },
+            "Papa":     { c: "#bf5af2", n: "棒约翰" },
+            "Wiseguy":  { c: "#ffd60a", n: "Wiseguy" },
+            "WePizza":  { c: "#30d158", n: "We Pizza" }
         };
 
         Papa.parse("pizza_data.csv", {
@@ -153,104 +56,68 @@
         });
 
         function render(data) {
-            const groups = {};
-            let maxVal = 0;
+            const grps = {}; let max = 0;
+            
+            data.forEach(r => {
+                let t = r['Timestamp (ET)'];
+                let n = r.Name; 
+                let p = parseInt(r['Live Popularity']||0);
+                
+                // 🚑 兼容性补丁：如果CSV里是旧的长名字，强行转换成新的短代码
+                // 这样你的旧数据也能显示中文了！
+                if(n.includes("District")) n = "District";
+                else if(n.includes("Domino")) n = "Dominos";
+                else if(n.includes("Papa")) n = "Papa";
+                else if(n.includes("We")) n = "WePizza";
+                else if(n.includes("Wiseguy")) n = "Wiseguy";
 
-            // 1. 数据清洗
-            data.forEach(row => {
-                let t = row['Timestamp (ET)'];
-                let n = row.Name;
-                let p = parseInt(row['Live Popularity'] || 0);
-                if(!t || !n) return;
+                if(!t || !CFG[n]) return; 
 
-                // 统一时间格式 20:00
+                // 时间截取
                 if(t.includes(" ")) t = t.split(" ")[1].substring(0, 5);
                 
-                if(!groups[t]) groups[t] = {};
-                groups[t][n] = p;
-
-                if(p > maxVal) maxVal = p;
+                if(!grps[t]) grps[t] = {};
+                grps[t][n] = p;
+                if(p > max) max = p;
             });
 
-            // 2. 更新 KPI
-            document.getElementById('val-max').innerText = maxVal;
-            if(maxVal > 50) {
-                const el = document.getElementById('val-level');
-                el.innerText = "HIGH";
-                el.style.color = "var(--danger)";
+            document.getElementById('v-max').innerText = max;
+            if(max > 50) {
+                const s = document.getElementById('v-stat');
+                s.innerText = "HIGH"; s.style.color = "var(--danger)";
             }
 
-            // 3. 🔪 切片逻辑 (只取最后 15 个时间点)
-            const times = Object.keys(groups).sort();
-            const slicedTimes = times.slice(-MAX_POINTS);
+            // 只显示最近 15 个点
+            const times = Object.keys(grps).sort().slice(-15);
+            document.getElementById('v-pts').innerText = times.length;
 
-            // 4. 构建 Dataset
-            const datasets = Object.keys(config).map(name => {
-                // 检查这家店在最近15个点里有没有数据
-                const points = slicedTimes.map(t => groups[t][name] !== undefined ? groups[t][name] : null);
-                
-                // 如果全是 null，就不画这条线
-                if(points.every(v => v === null)) return null;
-
-                const style = config[name];
+            const dsets = Object.keys(CFG).map(k => {
+                const pts = times.map(t => grps[t][k] ?? null);
+                // 只有全空才隐藏，只要有点就显示
+                if(pts.every(x => x === null)) return null;
                 return {
-                    label: style.n,
-                    data: points,
-                    borderColor: style.c,
-                    backgroundColor: style.c,
-                    borderWidth: 2,
-                    tension: 0.35, // 贝塞尔曲线
-                    pointRadius: 0, // 默认隐藏点，看起来更高级
-                    pointHoverRadius: 6,
-                    pointBackgroundColor: '#fff',
-                    spanGaps: true
+                    label: CFG[k].n, // 这里取出来的就是中文名！
+                    data: pts,
+                    borderColor: CFG[k].c, backgroundColor: CFG[k].c,
+                    borderWidth: 2, tension: 0.3, pointRadius: 2, 
+                    spanGaps: true // 关键：允许断点续连
                 };
-            }).filter(d => d !== null);
+            }).filter(x => x);
 
-            // 5. 渲染图表
-            const ctx = document.getElementById('mainChart').getContext('2d');
-            new Chart(ctx, {
+            new Chart(document.getElementById('C'), {
                 type: 'line',
-                data: { labels: slicedTimes, datasets },
+                data: { labels: times, datasets: dsets },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
+                    responsive: true, maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
-                    plugins: { 
-                        legend: false, // 隐藏默认
-                        tooltip: {
-                            backgroundColor: 'rgba(20,20,20,0.95)',
-                            padding: 12,
-                            titleColor: '#888',
-                            titleFont: { size: 10 },
-                            bodyFont: { size: 13, weight: 'bold' },
-                            cornerRadius: 8,
-                            displayColors: true
-                        }
-                    },
-                    scales: {
-                        x: { 
-                            grid: { display: false },
-                            ticks: { color: '#555', font: {size: 10}, maxRotation: 0 }
-                        },
-                        y: { 
-                            grid: { color: '#222', borderDash: [6, 6] },
-                            ticks: { display: false }, // 极简风格
-                            beginAtZero: true
-                        }
-                    }
+                    plugins: { legend: false },
+                    scales: { x: { grid: {display:false}, ticks:{color:'#666', font:{size:10}} }, y: { display:false, beginAtZero:true } }
                 }
             });
 
-            // 6. 渲染底部胶囊图例
-            const legBox = document.getElementById('legend-container');
-            datasets.forEach(d => {
-                legBox.innerHTML += `
-                    <div class="pill">
-                        <div class="color-block" style="background:${d.borderColor}"></div>
-                        ${d.label}
-                    </div>
-                `;
+            const lb = document.getElementById('Leg');
+            dsets.forEach(d => {
+                lb.innerHTML += `<div class="pill" style="border-color:${d.borderColor}">${d.label}</div>`;
             });
         }
     </script>
