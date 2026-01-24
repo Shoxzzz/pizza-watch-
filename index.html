@@ -64,32 +64,29 @@
         .dash-val { font-size: 26px; font-weight: 900; line-height: 1; }
         .dash-sub { font-size: 11px; margin-top: 4px; font-weight: 500; }
 
-        /* 战术卡片基础样式 */
-        .card { background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; position: relative; }
-        
-        /* 🔥 V24 特区披萨专属样式：红色呼吸边框 */
-        .card.core-target {
-            border: 1px solid rgba(255, 59, 48, 0.3);
-            box-shadow: 0 0 15px rgba(255, 59, 48, 0.1) inset;
-            animation: pulse-border 3s infinite;
+        /* 卡片 */
+        .card { 
+            background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 12px; 
+            padding: 16px; display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden;
         }
-        @keyframes pulse-border {
-            0% { border-color: rgba(255, 59, 48, 0.3); }
-            50% { border-color: rgba(255, 59, 48, 0.6); }
-            100% { border-color: rgba(255, 59, 48, 0.3); }
-        }
-
-        /* 核心标识标签 */
-        .core-tag {
+        .tac-tag {
             position: absolute; top: 0; right: 0;
-            background: var(--danger); color: #fff;
-            font-size: 9px; font-weight: bold;
-            padding: 2px 8px;
-            border-bottom-left-radius: 8px;
-            border-top-right-radius: 12px;
+            font-size: 9px; font-weight: 900; letter-spacing: 0.5px;
+            padding: 3px 10px;
+            border-bottom-left-radius: 10px;
+            text-transform: uppercase;
+        }
+        .tag-red { background: rgba(255, 59, 48, 0.2); color: var(--danger); border-left: 1px solid var(--danger); border-bottom: 1px solid var(--danger); }
+        .tag-blue { background: rgba(10, 132, 255, 0.2); color: var(--blue); border-left: 1px solid var(--blue); border-bottom: 1px solid var(--blue); }
+        .tag-yellow { background: rgba(255, 204, 0, 0.2); color: var(--warn); border-left: 1px solid var(--warn); border-bottom: 1px solid var(--warn); }
+        .tag-green { background: rgba(50, 215, 75, 0.2); color: var(--safe); border-left: 1px solid var(--safe); border-bottom: 1px solid var(--safe); }
+
+        .card.core-target {
+            border: 1px solid rgba(255, 59, 48, 0.4);
+            box-shadow: 0 0 20px rgba(255, 59, 48, 0.05) inset;
         }
 
-        .row-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .row-top { display: flex; justify-content: space-between; align-items: flex-start; margin-top: 4px; }
         .shop-name { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 2px; }
         .shop-desc { font-size: 11px; color: var(--sub-text); }
         .big-score { font-size: 28px; font-weight: 900; line-height: 1; letter-spacing: -1px; }
@@ -102,33 +99,28 @@
         .spark-container { display: flex; align-items: flex-end; gap: 2px; height: 30px; margin-top: 5px; padding-top: 10px; border-top: 1px dashed #222; }
         .spark-bar { flex: 1; background: #333; border-radius: 2px; min-height: 2px; }
 
-        .manual-card {
-            background: #090909; border: 1px solid #333; border-radius: 12px; 
-            padding: 20px; display: flex; flex-direction: column; gap: 15px;
-        }
-        .man-header { 
-            font-size: 13px; font-weight: 900; color: #fff; text-transform: uppercase; 
-            letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 5px;
-            display: flex; align-items: center; gap: 8px;
-        }
-        .man-icon { color: var(--warn); }
-        .man-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-        .man-item { display: flex; flex-direction: column; gap: 8px; }
-        .man-title { font-size: 11px; color: #888; font-weight: bold; }
+        /* 手册样式 */
+        .manual-card { background: #090909; border: 1px solid #333; border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 15px; }
+        .man-header { font-size: 13px; font-weight: 900; color: #fff; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 5px; display: flex; align-items: center; gap: 8px; }
         
-        .demo-box { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #ccc; }
-        .demo-bar { width: 6px; height: 14px; background: #333; border-radius: 2px; }
-        .demo-bar.red { background: var(--danger); box-shadow: 0 0 5px rgba(255, 59, 48, 0.4); }
-        .demo-bar.gray { background: #333; }
-        .demo-bar.white { background: #fff; }
-        .demo-bar.tall { height: 18px; }
-        .demo-bar.short { height: 6px; }
+        .man-list { display: flex; flex-direction: column; gap: 15px; }
+        .man-item { display: flex; gap: 12px; }
         
-        .demo-arrow { font-weight: bold; font-size: 12px; }
+        /* 标签图例 */
+        .man-tag-icon { 
+            width: 32px; height: 16px; border-radius: 4px; flex-shrink: 0; margin-top: 2px;
+            font-size: 8px; font-weight: 900; display: flex; align-items: center; justify-content: center;
+        }
+        .bg-red { background: var(--danger); color: #000; }
+        .bg-blue { background: var(--blue); color: #000; }
+        .bg-yellow { background: var(--warn); color: #000; }
+        .bg-green { background: var(--safe); color: #000; }
+
+        .man-content { display: flex; flex-direction: column; gap: 4px; }
+        .man-title { font-size: 12px; font-weight: bold; color: #fff; }
+        .man-desc { font-size: 11px; color: #888; line-height: 1.4; }
+
         .c-red { color: var(--danger); }
-        .c-green { color: var(--safe); }
-        .c-gray { color: #888; }
-        
         .loading { text-align: center; margin-top: 50px; color: #444; font-size: 12px; }
     </style>
 </head>
@@ -147,48 +139,85 @@
 
         <div class="manual-card">
             <div class="man-header">
-                <span class="man-icon">⚠️</span> 情报判读手册 (FIELD MANUAL)
+                <span>🛡️</span> 战术标识详解 (TACTICAL GUIDE)
             </div>
 
-            <div class="man-grid">
+            <div class="man-list">
+                
                 <div class="man-item">
-                    <div class="man-title">颜色图鉴 (COLOR)</div>
-                    <div class="demo-box">
-                        <div class="demo-bar red"></div> <span>热度 > 50 (高威胁)</span>
-                    </div>
-                    <div class="demo-box">
-                        <div class="demo-bar gray"></div> <span>热度 < 50 (常规)</span>
+                    <div class="man-tag-icon bg-red">CORE</div>
+                    <div class="man-content">
+                        <div class="man-title">核心哨所 (District Pizza)</div>
+                        <div class="man-desc">
+                            <strong>定义：</strong> 距离五角大楼最近的深夜营业点。<br>
+                            <strong>战术逻辑：</strong> 因距离太近，它对大楼内部的人员流动最敏感。如果其他店都没人，只有这里爆满，说明是<strong>内部小范围紧急事态</strong>。
+                        </div>
                     </div>
                 </div>
 
                 <div class="man-item">
-                    <div class="man-title">形态含义 (SHAPE)</div>
-                    <div class="demo-box">
-                        <div class="demo-bar tall"></div> <span>柱子高 = 人多</span>
-                    </div>
-                    <div class="demo-box">
-                        <span class="demo-arrow c-red">▲</span> <span>人数激增 (警报)</span>
+                    <div class="man-tag-icon bg-blue">SUPPLY</div>
+                    <div class="man-content">
+                        <div class="man-title">补给线 (Domino's / Papa John's)</div>
+                        <div class="man-desc">
+                            <strong>定义：</strong> 主营外卖配送的连锁巨头。<br>
+                            <strong>战术逻辑：</strong> 当官员们被限制离开大楼（如重大危机指挥中）时，必须依赖批量外卖。此处激增代表<strong>“全员加班/禁足”</strong>。
+                        </div>
                     </div>
                 </div>
+
+                <div class="man-item">
+                    <div class="man-tag-icon bg-yellow">CROWD</div>
+                    <div class="man-content">
+                        <div class="man-title">人员聚集 (Wiseguy)</div>
+                        <div class="man-desc">
+                            <strong>定义：</strong> 位于商圈的切片披萨店，主打散客。<br>
+                            <strong>战术逻辑：</strong> 它的热度代表<strong>“物理人群密度”</strong>。如果此处爆满，可能是有媒体聚集、休班人员聚餐或周边有公共活动。
+                        </div>
+                    </div>
+                </div>
+
+                <div class="man-item">
+                    <div class="man-tag-icon bg-green">FLANK</div>
+                    <div class="man-content">
+                        <div class="man-title">侧翼观察 (We Pizza)</div>
+                        <div class="man-desc">
+                            <strong>定义：</strong> 位于水晶城（Crystal City）的分部。<br>
+                            <strong>战术逻辑：</strong> 它是<strong>对照组</strong>。如果 We 披萨和特区披萨同时爆满，说明只是“周末大家都在吃披萨”。如果 We 披萨很冷清，而核心哨所爆满，才是真正的情报。
+                        </div>
+                    </div>
+                </div>
+
             </div>
             
-            <div style="font-size:10px; color:#444; margin-top:5px; border-top:1px dashed #333; padding-top:10px;">
-                <strong>⭐ 关于核心指标：</strong><br>
-                “特区披萨” (District Pizza) 因距离最近且营业至深夜，被视为判断五角大楼内部活动的最敏感风向标。
+            <div style="font-size:10px; color:#444; margin-top:10px; border-top:1px dashed #333; padding-top:10px; text-align:center;">
+                PENTAGON OPS V26 // FIELD MANUAL
             </div>
         </div>
-        
-        <div style="text-align:center; font-size:10px; color:#333; margin-top:5px;">PENTAGON OPS V24 // CORE INTEL</div>
     </div>
 
     <script>
-        // 🔥 V24 改动：把备注改成了通俗易懂的大白话
         const DICT = {
-            "District": { name: "特区披萨", desc: "核心指标 (五角大楼首选)", isCore: true },
-            "Domino":   { name: "达美乐",   desc: "外卖巨头 (常规民用)",    isCore: false },
-            "Papa":     { name: "棒约翰",   desc: "外卖巨头 (备用渠道)",    isCore: false },
-            "Wiseguy":  { name: "Wiseguy",  desc: "切片披萨 (散客为主)",    isCore: false },
-            "We":       { name: "We披萨",   desc: "水晶城分部 (外围)",     isCore: false }
+            "District": { 
+                name: "特区披萨", desc: "核心指标 (五角大楼首选)", 
+                role: "CORE INTEL", tagClass: "tag-red", isCore: true 
+            },
+            "Domino":   { 
+                name: "达美乐",   desc: "后勤补给 (主)", 
+                role: "SUPPLY LINE", tagClass: "tag-blue", isCore: false 
+            },
+            "Papa":     { 
+                name: "棒约翰",   desc: "后勤补给 (备)", 
+                role: "SUPPLY LINE", tagClass: "tag-blue", isCore: false 
+            },
+            "Wiseguy":  { 
+                name: "Wiseguy",  desc: "人员聚集 (散客)", 
+                role: "CROWD INTEL", tagClass: "tag-yellow", isCore: false 
+            },
+            "We":       { 
+                name: "We披萨",   desc: "侧翼观察 (水晶城)", 
+                role: "FLANK WATCH", tagClass: "tag-green", isCore: false 
+            }
         };
 
         Papa.parse("pizza_data.csv", {
@@ -245,12 +274,9 @@
                 shopDataList.push({ key, history, currentPop, diff, current });
             });
 
-            // 排序：核心据点必须置顶！然后才是按热度排序
             shopDataList.sort((a, b) => {
-                // 如果 a 是核心，b 不是，a 排前面
                 if (DICT[a.key].isCore && !DICT[b.key].isCore) return -1;
                 if (!DICT[a.key].isCore && DICT[b.key].isCore) return 1;
-                // 否则按热度降序
                 return b.currentPop - a.currentPop;
             });
 
@@ -302,16 +328,15 @@
                     barsHtml += `<div class="spark-bar" style="height:${h}%; background:${color}; opacity:${opacity}"></div>`;
                 });
 
-                // 🔥 V24: 核心据点添加特殊 CSS 类和标签
                 const coreClass = conf.isCore ? 'core-target' : '';
-                const coreTag = conf.isCore ? '<div class="core-tag">⭐ KEY INTEL</div>' : '';
+                const tagHtml = `<div class="tac-tag ${conf.tagClass}">${conf.role}</div>`;
 
                 listArea.innerHTML += `
                 <div class="card ${coreClass}">
-                    ${coreTag}
+                    ${tagHtml}
                     <div class="row-top">
                         <div>
-                            <div class="shop-name" style="${conf.isCore ? 'color:var(--danger)' : ''}">${conf.name}</div>
+                            <div class="shop-name">${conf.name}</div>
                             <div class="shop-desc">${conf.desc}</div>
                         </div>
                         <div class="big-score" style="color: ${currentPop > 50 ? '#ff3b30' : '#fff'}">${currentPop}</div>
