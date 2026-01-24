@@ -3,13 +3,11 @@ import csv
 import os
 import random
 import time
-import requests
 from datetime import datetime
 import pytz
 from tenacity import retry, stop_after_attempt, wait_fixed
 
-# 🎯 强制字典：{ "写入CSV的代号": "Google搜索地址" }
-# 这里的 Key (左边的词) 绝对不要改！它就是我们在前端显示的 ID
+# 🎯 目标名单
 TARGETS = {
     "District": "District Pizza Palace, 2325 S Eads St, Arlington, VA", 
     "Dominos":  "Domino's Pizza, 3535 South Ball St, Arlington, VA 22202",
@@ -25,8 +23,24 @@ TZ = pytz.timezone('America/New_York')
 def fetch_data(address):
     return livepopulartimes.get_populartimes_by_address(address)
 
+def get_usual_popularity(data, current_dt):
+    """🧠 智能分析：获取'平时这个时候'的平均热度"""
+    try:
+        # Google 返回的数据通常是周一(0)到周日(6)
+        day_idx = current_dt.weekday() 
+        hour_idx = current_dt.hour
+        
+        # 获取当天的历史数据列表 (24个小时)
+        pop_times = data.get('populartimes', [])
+        if not pop_times: return 0
+        
+        # 提取当前小时的平均值
+        usual = pop_times[day_idx]['data'][hour_idx]
+        return usual
+    except:
+        return 0
+
 def run_spy():
-    # 🕒 统一时间戳：一次抓取，所有店用同一个由时间，确保前端线条对其
     batch_time = datetime.now(TZ)
     batch_time_str = batch_time.strftime('%Y-%m-%d %H:%M:%S')
     
@@ -34,19 +48,27 @@ def run_spy():
     
     current_batch = []
     
-    # 遍历字典：key 是代号，addr 是地址
     for code_name, address in TARGETS.items():
         try:
-            time.sleep(random.randint(1, 3)) 
+            time.sleep(random.randint(1, 2)) 
             data = fetch_data(address)
             
-            # 无论 Google 返回什么名字，我们只存 code_name (例如 "Dominos")
-            # 这样前端就能完美匹配中文了！
-            pop = data.get('current_popularity', 0) or 0
+            # 1. 获取实时热度
+            live_pop = data.get('current_popularity', 0) or 0
+            
+            # 2. 获取平时热度 (历史平均)
+            usual_pop = get_usual_popularity(data, batch_time)
+            
+            # 3. 计算偏差 (异常指数)
+            # 正数表示比平时多，负数表示比平时少
+            gap = live_pop - usual_pop
+            
             rating = data.get('rating', 0)
             
-            print(f"📍 {code_name} | Pop: {pop}")
-            current_batch.append([batch_time_str, code_name, pop, rating])
+            print(f"📍 {code_name} | Live: {live_pop} | Usual: {usual_pop} | Gap: {gap}")
+            
+            # 💾 存入 CSV: 新增了两列 (Usual, Gap)
+            current_batch.append([batch_time_str, code_name, live_pop, rating, usual_pop, gap])
 
         except Exception as e:
             print(f"❌ Error {code_name}: {e}")
@@ -56,8 +78,9 @@ def run_spy():
         file_exists = os.path.isfile(LIVE_FILE)
         with open(LIVE_FILE, 'a', newline='', encoding='utf-8-sig') as f:
             writer = csv.writer(f)
+            # 如果是新文件，写入新表头
             if not file_exists: 
-                writer.writerow(['Timestamp (ET)', 'Name', 'Live Popularity', 'Rating'])
+                writer.writerow(['Timestamp (ET)', 'Name', 'Live Popularity', 'Rating', 'Usual Popularity', 'Gap'])
             writer.writerows(current_batch)
 
 if __name__ == "__main__":
