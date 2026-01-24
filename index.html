@@ -3,200 +3,183 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>五角大楼情报 V15</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <title>五角大楼情报 V16</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700;900&display=swap" rel="stylesheet">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        :root { --bg: #000; --card: #151515; --text: #fff; --sub: #888; --danger: #ff453a; --warn: #ff9f0a; --success: #30d158; }
-        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+        :root { --bg: #000; --card: #151515; --text: #fff; --sub: #888; --danger: #ff453a; --warn: #ff9f0a; --success: #30d158; --blue: #0a84ff; }
+        body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; padding: 0; min-height: 100vh; display: flex; flex-direction: column; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
         
-        /* 顶部标题栏 */
-        .header { padding: 12px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid #222; flex-shrink: 0; }
-        .brand { font-weight: 700; font-size: 16px; letter-spacing: 0.5px; }
-        .live { color: var(--success); font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
-        .dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: p 1s infinite; } @keyframes p { 50% { opacity: 0.3; } }
+        /* 顶部 */
+        .header { padding: 15px 20px; background: rgba(20,20,20,0.9); border-bottom: 1px solid #333; position: sticky; top: 0; z-index: 100; backdrop-filter: blur(10px); display: flex; justify-content: space-between; align-items: center; }
+        .brand { font-weight: 900; font-size: 18px; letter-spacing: -0.5px; text-transform: uppercase; }
+        .status { font-size: 12px; font-weight: bold; color: var(--success); display: flex; align-items: center; gap: 6px; background: rgba(48, 209, 88, 0.15); padding: 4px 10px; border-radius: 20px; }
+        .dot { width: 8px; height: 8px; background: currentColor; border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.3; } 100% { opacity: 1; } }
+
+        /* 列表容器 */
+        .list-container { padding: 20px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 40px; }
         
-        /* 🔥 核心修复：KPI 滑动容器 */
-        .kpi-scroll { 
-            display: flex; 
-            gap: 12px; 
-            padding: 16px 20px; 
-            overflow-x: auto; /* 允许横向滑动 */
-            -webkit-overflow-scrolling: touch; /* iOS丝滑滚动 */
-            flex-shrink: 0; /* 防止被挤压 */
-        }
-        .kpi-scroll::-webkit-scrollbar { display: none; } /* 隐藏滚动条 */
-        
-        /* 🔥 核心修复：卡片定宽，拒绝变形 */
-        .card { 
+        /* 战术卡片 */
+        .tac-card { 
             background: var(--card); 
             border: 1px solid #333; 
-            border-radius: 12px; 
-            padding: 12px 16px; 
-            min-width: 140px; /* 强制最小宽度，确保文字不换行 */
-            flex-shrink: 0;   /* 禁止被压缩 */
-            display: flex; flex-direction: column; justify-content: center;
-        }
-        
-        .lbl { font-size: 11px; color: var(--sub); font-weight: bold; margin-bottom: 6px; letter-spacing: 0.5px; white-space: nowrap; }
-        .val { font-size: 22px; font-weight: 700; line-height: 1.2; }
-        .sub-val { font-size: 11px; margin-top: 4px; font-weight: 500; opacity: 0.8; }
-
-        /* 图表区：自适应剩余空间 */
-        .chart-wrap { 
-            flex: 1; 
-            margin: 0 10px; 
-            background: #090909; 
             border-radius: 16px; 
+            padding: 16px; 
             position: relative; 
-            min-height: 0; /* 防止溢出 */
-            border: 1px solid #222;
+            overflow: hidden; 
+            transition: all 0.2s;
         }
         
-        /* 底部图例 */
-        .leg-bar { padding: 15px 20px; display: flex; gap: 10px; overflow-x: auto; border-top: 1px solid #222; flex-shrink: 0; align-items: center; }
-        .pill { background: #1a1a1a; padding: 6px 12px; border-radius: 8px; font-size: 11px; color: #ccc; white-space: nowrap; border-left: 3px solid transparent; display: flex; align-items: center; }
+        /* 头部：店名 + 热度值 */
+        .card-top { display: flex; justify-content: space-between; align-items: flex-end; margin-bottom: 10px; position: relative; z-index: 2; }
+        .shop-info { display: flex; flex-direction: column; gap: 2px; }
+        .shop-name { font-size: 16px; font-weight: 700; color: #fff; }
+        .shop-tag { font-size: 11px; color: var(--sub); font-weight: 500; }
+        
+        .hot-val { font-size: 28px; font-weight: 900; line-height: 1; color: #fff; text-align: right; }
+        .hot-lbl { font-size: 10px; color: var(--sub); text-align: right; margin-top: 4px; }
+
+        /* 进度条 (血条) 背景 */
+        .bar-bg { height: 8px; background: #222; border-radius: 4px; width: 100%; position: relative; overflow: hidden; }
+        /* 进度条 填充 */
+        .bar-fill { height: 100%; border-radius: 4px; width: 0%; transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); }
+        
+        /* 状态标签 */
+        .status-badge { 
+            position: absolute; top: 16px; right: 16px; 
+            font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; display: none;
+        }
+
+        /* 底部信息 */
+        .card-footer { margin-top: 12px; display: flex; justify-content: space-between; font-size: 11px; color: #666; }
+        .trend { font-weight: bold; }
+
+        /* ⚠️ 颜色定义 */
+        .c-red { background: var(--danger); box-shadow: 0 0 10px rgba(255, 69, 58, 0.4); }
+        .c-blue { background: var(--blue); }
+        .c-purple { background: #bf5af2; }
+        .c-yellow { background: var(--warn); }
+        .c-green { background: var(--success); }
+
+        /* 空状态 */
+        .loading { text-align: center; color: #555; margin-top: 50px; font-size: 12px; }
     </style>
 </head>
 <body>
+
     <div class="header">
-        <div class="brand">五角大楼情报局</div>
-        <div class="live"><div class="dot"></div>实时监控</div>
+        <div class="brand">PENTAGON OPS</div>
+        <div class="status"><div class="dot"></div>LIVE</div>
     </div>
 
-    <div class="kpi-scroll">
-        <div class="card">
-            <div class="lbl">⚡️ 异常波动 (Gap)</div>
-            <div class="val" id="v-gap">--</div>
-            <div class="sub-val" id="v-gap-desc">分析中...</div>
-        </div>
-        
-        <div class="card">
-            <div class="lbl">📈 实时峰值 (Max)</div>
-            <div class="val" id="v-max">--</div>
-        </div>
-        
-        <div class="card">
-            <div class="lbl">🚨 威胁等级 (Level)</div>
-            <div class="val" id="v-stat" style="color:var(--success)">正常</div>
-        </div>
-
-        <div class="card">
-            <div class="lbl">📊 采样点数</div>
-            <div class="val" id="v-pts">0</div>
-        </div>
+    <div class="list-container" id="main-list">
+        <div class="loading">正在连接卫星数据...</div>
     </div>
-
-    <div class="chart-wrap"><canvas id="C"></canvas></div>
-    <div class="leg-bar" id="Leg"></div>
 
     <script>
-        // ⚔️ 暴力匹配字典：只要名字里包含 Key，就强制显示成 Value
-        const DICT = {
-            "District": { c: "#ff453a", n: "特区披萨 (核心)" },
-            "Domino":   { c: "#0a84ff", n: "达美乐 (外卖)" },
-            "Papa":     { c: "#bf5af2", n: "棒约翰 (外卖)" },
-            "Wiseguy":  { c: "#ffd60a", n: "Wiseguy (切片)" },
-            "We":       { c: "#30d158", n: "We披萨 (水晶城)" }
+        // 🛠️ 暴力汉化配置
+        const CONFIG = {
+            "District": { name: "特区披萨", tag: "核心据点", color: "c-red" },
+            "Domino":   { name: "达美乐",   tag: "外卖配送", color: "c-blue" },
+            "Papa":     { name: "棒约翰",   tag: "外卖配送", color: "c-purple" },
+            "Wiseguy":  { name: "Wiseguy",  tag: "切片店",   color: "c-yellow" },
+            "We":       { name: "We披萨",   tag: "水晶城",   color: "c-green" }
         };
 
         Papa.parse("pizza_data.csv", {
             download: true, header: true, skipEmptyLines: true,
-            complete: res => render(res.data)
+            complete: function(results) {
+                renderList(results.data);
+            },
+            error: function() {
+                document.getElementById('main-list').innerHTML = '<div class="loading">数据读取失败，请检查CSV</div>';
+            }
         });
 
-        function render(data) {
-            const grps = {}; let max = 0; let maxGap = -999;
+        function renderList(data) {
+            if(!data || data.length === 0) return;
+
+            // 1. 获取最新一次的更新时间
+            const lastRow = data[data.length - 1];
+            const latestTime = lastRow['Timestamp (ET)'];
+
+            // 2. 提取最新一批数据 (假设一次抓5个，就倒着找这5个)
+            // 为了保险，我们遍历最后20行，把每个店的最新数据找出来
+            const latestStatus = {}; 
             
-            data.forEach(r => {
-                let t = r['Timestamp (ET)'];
-                let rawName = r.Name; 
-                let p = parseInt(r['Live Popularity']||0);
-                let gap = parseInt(r['Gap']||0);
+            // 倒序遍历，找到每家店最新的记录
+            for (let i = data.length - 1; i >= 0; i--) {
+                let row = data[i];
+                let rawName = row.Name;
+                if (!rawName) continue;
 
-                if(!t || !rawName) return;
-
-                // 🔪 暴力清洗：不管原来的名字多乱，只要沾边就“抓”进来
+                // 匹配 Key
                 let key = null;
                 if(rawName.includes("District")) key = "District";
                 else if(rawName.includes("Domino")) key = "Domino";
                 else if(rawName.includes("Papa")) key = "Papa";
-                else if(rawName.includes("We")) key = "We"; // 包含 We 就行，不管是不是 We The Pizza
+                else if(rawName.includes("We")) key = "We";
                 else if(rawName.includes("Wiseguy")) key = "Wiseguy";
 
-                if(!key) return; // 没匹配到的杂鱼数据直接丢掉，防止污染图表
-
-                // 统一时间格式
-                if(t.includes(" ")) t = t.split(" ")[1].substring(0, 5);
-                
-                if(!grps[t]) grps[t] = {};
-                grps[t][key] = p;
-
-                if(p > max) max = p;
-                if(gap > maxGap) maxGap = gap;
-            });
-
-            // 更新 KPI
-            document.getElementById('v-max').innerText = max;
-            document.getElementById('v-pts').innerText = Object.keys(grps).length;
-
-            // 异常检测逻辑
-            const gapEl = document.getElementById('v-gap');
-            const descEl = document.getElementById('v-gap-desc');
-            const statEl = document.getElementById('v-stat');
-
-            if (maxGap > 20) {
-                gapEl.innerText = "+" + maxGap + "%";
-                gapEl.style.color = "var(--danger)";
-                descEl.innerText = "⚠️ 异常激增";
-                descEl.style.color = "var(--danger)";
-                statEl.innerText = "高 (HIGH)";
-                statEl.style.color = "var(--danger)";
-            } else if (maxGap > 0) {
-                gapEl.innerText = "+" + maxGap + "%";
-                gapEl.style.color = "var(--warn)";
-                descEl.innerText = "📈 略有波动";
-                descEl.style.color = "var(--warn)";
-            } else {
-                gapEl.innerText = "稳定";
-                gapEl.style.color = "var(--success)";
-                descEl.innerText = "与平时持平";
-                descEl.style.color = "#666";
+                if (key && !latestStatus[key]) {
+                    latestStatus[key] = {
+                        pop: parseInt(row['Live Popularity'] || 0),
+                        gap: parseInt(row['Gap'] || 0), // 异常偏差
+                        time: row['Timestamp (ET)'].split(" ")[1].substring(0, 5) // 取 HH:mm
+                    };
+                }
+                // 如果5家都找到了，就停止
+                if (Object.keys(latestStatus).length === 5) break;
             }
 
-            // 画图：只取最近15个点
-            const times = Object.keys(grps).sort().slice(-15);
-            const dsets = Object.keys(DICT).map(k => {
-                const pts = times.map(t => grps[t][k] ?? null);
-                // 只要该店在最近15次里出现过1次，就画出来，别隐藏
-                if(pts.every(x => x === null)) return null;
-                return {
-                    label: DICT[k].n, // 强制使用中文名
-                    data: pts,
-                    borderColor: DICT[k].c, backgroundColor: DICT[k].c,
-                    borderWidth: 2, tension: 0.3, pointRadius: 2, spanGaps: true
-                };
-            }).filter(x => x);
+            // 3. 转成数组并排序 (按热度从高到低！)
+            // 这样最忙的店永远在最上面，不用你去翻折线图
+            const sortedShops = Object.keys(latestStatus).map(key => {
+                return { key: key, ...latestStatus[key] };
+            }).sort((a, b) => b.pop - a.pop);
 
-            new Chart(document.getElementById('C'), {
-                type: 'line',
-                data: { labels: times, datasets: dsets },
-                options: {
-                    responsive: true, maintainAspectRatio: false,
-                    interaction: { mode: 'index', intersect: false },
-                    plugins: { legend: false }, // 隐藏默认图例
-                    scales: { 
-                        x: { display:false }, 
-                        y: { display:false, beginAtZero:true } // 隐藏Y轴数字，更干净
-                    }
-                }
-            });
+            // 4. 生成 HTML
+            const container = document.getElementById('main-list');
+            container.innerHTML = ""; // 清空 Loading
 
-            // 生成底部图例
-            const lb = document.getElementById('Leg');
-            dsets.forEach(d => {
-                lb.innerHTML += `<div class="pill" style="border-color:${d.borderColor}">${d.label}</div>`;
+            // 显示数据时间
+            container.innerHTML += `<div style="font-size:10px; color:#444; margin-bottom:10px; text-align:right;">数据更新于: ${latestTime}</div>`;
+
+            sortedShops.forEach(shop => {
+                const info = CONFIG[shop.key];
+                const percent = shop.pop; // 0-100
+                
+                // 异常检测文案
+                let trendHtml = `<span style="color:#666">平稳</span>`;
+                if(shop.gap > 15) trendHtml = `<span style="color:var(--danger)">🔥 激增 (+${shop.gap})</span>`;
+                else if(shop.gap > 0) trendHtml = `<span style="color:var(--warn)">📈 上升 (+${shop.gap})</span>`;
+                else if(shop.gap < 0) trendHtml = `<span style="color:var(--success)">📉 下降 (${shop.gap})</span>`;
+
+                const card = `
+                <div class="tac-card">
+                    <div class="card-top">
+                        <div class="shop-info">
+                            <div class="shop-name">${info.name}</div>
+                            <div class="shop-tag">${info.tag}</div>
+                        </div>
+                        <div>
+                            <div class="hot-val" style="color: ${percent > 50 ? 'var(--danger)' : '#fff'}">${percent}</div>
+                            <div class="hot-lbl">实时强度</div>
+                        </div>
+                    </div>
+                    
+                    <div class="bar-bg">
+                        <div class="bar-fill ${info.color}" style="width: ${percent}%"></div>
+                    </div>
+
+                    <div class="card-footer">
+                        <div>更新时间: ${shop.time}</div>
+                        <div class="trend">${trendHtml}</div>
+                    </div>
+                </div>
+                `;
+                container.innerHTML += card;
             });
         }
     </script>
