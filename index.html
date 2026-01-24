@@ -49,7 +49,7 @@
 
         .container { padding: 15px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 80px; }
 
-        /* 总仪表盘 */
+        /* 仪表盘 */
         .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 5px; }
         .dash-card {
             background: var(--dash-bg); border: 1px solid #333; border-radius: 12px;
@@ -64,8 +64,31 @@
         .dash-val { font-size: 26px; font-weight: 900; line-height: 1; }
         .dash-sub { font-size: 11px; margin-top: 4px; font-weight: 500; }
 
-        /* 战术卡片 */
-        .card { background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; }
+        /* 战术卡片基础样式 */
+        .card { background: var(--card-bg); border: 1px solid #2a2a2a; border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; position: relative; }
+        
+        /* 🔥 V24 特区披萨专属样式：红色呼吸边框 */
+        .card.core-target {
+            border: 1px solid rgba(255, 59, 48, 0.3);
+            box-shadow: 0 0 15px rgba(255, 59, 48, 0.1) inset;
+            animation: pulse-border 3s infinite;
+        }
+        @keyframes pulse-border {
+            0% { border-color: rgba(255, 59, 48, 0.3); }
+            50% { border-color: rgba(255, 59, 48, 0.6); }
+            100% { border-color: rgba(255, 59, 48, 0.3); }
+        }
+
+        /* 核心标识标签 */
+        .core-tag {
+            position: absolute; top: 0; right: 0;
+            background: var(--danger); color: #fff;
+            font-size: 9px; font-weight: bold;
+            padding: 2px 8px;
+            border-bottom-left-radius: 8px;
+            border-top-right-radius: 12px;
+        }
+
         .row-top { display: flex; justify-content: space-between; align-items: flex-start; }
         .shop-name { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 2px; }
         .shop-desc { font-size: 11px; color: var(--sub-text); }
@@ -79,20 +102,33 @@
         .spark-container { display: flex; align-items: flex-end; gap: 2px; height: 30px; margin-top: 5px; padding-top: 10px; border-top: 1px dashed #222; }
         .spark-bar { flex: 1; background: #333; border-radius: 2px; min-height: 2px; }
 
-        /* 🔥 新增：底部说明书样式 */
-        .guide-card {
-            background: #080808; border: 1px solid #222; border-radius: 12px; padding: 15px;
-            margin-top: 10px; display: flex; flex-direction: column; gap: 10px;
+        .manual-card {
+            background: #090909; border: 1px solid #333; border-radius: 12px; 
+            padding: 20px; display: flex; flex-direction: column; gap: 15px;
         }
-        .guide-title { font-size: 12px; font-weight: bold; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; border-bottom: 1px solid #222; padding-bottom: 8px; }
-        .guide-row { display: flex; align-items: center; gap: 10px; font-size: 11px; color: #ccc; }
-        .guide-icon { width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 4px; }
-        .g-bar { width: 4px; height: 12px; background: #333; border-radius: 2px; }
-        .g-bar-red { background: var(--danger); }
+        .man-header { 
+            font-size: 13px; font-weight: 900; color: #fff; text-transform: uppercase; 
+            letter-spacing: 1px; border-bottom: 1px solid #333; padding-bottom: 10px; margin-bottom: 5px;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .man-icon { color: var(--warn); }
+        .man-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+        .man-item { display: flex; flex-direction: column; gap: 8px; }
+        .man-title { font-size: 11px; color: #888; font-weight: bold; }
         
+        .demo-box { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #ccc; }
+        .demo-bar { width: 6px; height: 14px; background: #333; border-radius: 2px; }
+        .demo-bar.red { background: var(--danger); box-shadow: 0 0 5px rgba(255, 59, 48, 0.4); }
+        .demo-bar.gray { background: #333; }
+        .demo-bar.white { background: #fff; }
+        .demo-bar.tall { height: 18px; }
+        .demo-bar.short { height: 6px; }
+        
+        .demo-arrow { font-weight: bold; font-size: 12px; }
         .c-red { color: var(--danger); }
         .c-green { color: var(--safe); }
         .c-gray { color: #888; }
+        
         .loading { text-align: center; margin-top: 50px; color: #444; font-size: 12px; }
     </style>
 </head>
@@ -105,55 +141,54 @@
 
     <div class="container">
         <div id="dash-area"></div>
-        
         <div id="list-area">
             <div class="loading">正在解密卫星数据流...</div>
         </div>
 
-        <div class="guide-card">
-            <div class="guide-title">情报解读指南 (INTEL GUIDE)</div>
+        <div class="manual-card">
+            <div class="man-header">
+                <span class="man-icon">⚠️</span> 情报判读手册 (FIELD MANUAL)
+            </div>
+
+            <div class="man-grid">
+                <div class="man-item">
+                    <div class="man-title">颜色图鉴 (COLOR)</div>
+                    <div class="demo-box">
+                        <div class="demo-bar red"></div> <span>热度 > 50 (高威胁)</span>
+                    </div>
+                    <div class="demo-box">
+                        <div class="demo-bar gray"></div> <span>热度 < 50 (常规)</span>
+                    </div>
+                </div>
+
+                <div class="man-item">
+                    <div class="man-title">形态含义 (SHAPE)</div>
+                    <div class="demo-box">
+                        <div class="demo-bar tall"></div> <span>柱子高 = 人多</span>
+                    </div>
+                    <div class="demo-box">
+                        <span class="demo-arrow c-red">▲</span> <span>人数激增 (警报)</span>
+                    </div>
+                </div>
+            </div>
             
-            <div class="guide-row">
-                <div class="guide-icon" style="gap:2px">
-                    <div class="g-bar"></div><div class="g-bar"></div><div class="g-bar g-bar-red"></div>
-                </div>
-                <div>
-                    <span style="color:#fff; font-weight:bold;">迷你走势图</span>：从左到右代表 过去 → 现在
-                </div>
-            </div>
-
-            <div class="guide-row">
-                <div class="guide-icon"><div class="g-bar g-bar-red"></div></div>
-                <div>
-                    <span style="color:var(--danger)">红色柱子</span>：代表该小时热度 > 50 (高威胁)
-                </div>
-            </div>
-
-            <div class="guide-row">
-                <div class="guide-icon" style="color:var(--danger)">▲</div>
-                <div>
-                    <span style="color:#fff">1H 变化</span>：对比 1 小时前的人流增减
-                </div>
-            </div>
-
-            <div class="guide-row">
-                <div class="guide-icon" style="color:#fff">24H</div>
-                <div>
-                    <span style="color:#fff">24H 峰值</span>：过去一整天的最高纪录
-                </div>
+            <div style="font-size:10px; color:#444; margin-top:5px; border-top:1px dashed #333; padding-top:10px;">
+                <strong>⭐ 关于核心指标：</strong><br>
+                “特区披萨” (District Pizza) 因距离最近且营业至深夜，被视为判断五角大楼内部活动的最敏感风向标。
             </div>
         </div>
         
-        <div style="text-align:center; font-size:10px; color:#333; margin-top:5px;">PENTAGON OPS V21 // MANUAL INCLUDED</div>
+        <div style="text-align:center; font-size:10px; color:#333; margin-top:5px;">PENTAGON OPS V24 // CORE INTEL</div>
     </div>
 
     <script>
+        // 🔥 V24 改动：把备注改成了通俗易懂的大白话
         const DICT = {
-            "District": { name: "特区披萨", desc: "核心据点" },
-            "Domino":   { name: "达美乐",   desc: "外卖巨头" },
-            "Papa":     { name: "棒约翰",   desc: "外卖备选" },
-            "Wiseguy":  { name: "Wiseguy",  desc: "切片散客" },
-            "We":       { name: "We披萨",   desc: "水晶城" }
+            "District": { name: "特区披萨", desc: "核心指标 (五角大楼首选)", isCore: true },
+            "Domino":   { name: "达美乐",   desc: "外卖巨头 (常规民用)",    isCore: false },
+            "Papa":     { name: "棒约翰",   desc: "外卖巨头 (备用渠道)",    isCore: false },
+            "Wiseguy":  { name: "Wiseguy",  desc: "切片披萨 (散客为主)",    isCore: false },
+            "We":       { name: "We披萨",   desc: "水晶城分部 (外围)",     isCore: false }
         };
 
         Papa.parse("pizza_data.csv", {
@@ -210,9 +245,15 @@
                 shopDataList.push({ key, history, currentPop, diff, current });
             });
 
-            shopDataList.sort((a, b) => b.currentPop - a.currentPop);
+            // 排序：核心据点必须置顶！然后才是按热度排序
+            shopDataList.sort((a, b) => {
+                // 如果 a 是核心，b 不是，a 排前面
+                if (DICT[a.key].isCore && !DICT[b.key].isCore) return -1;
+                if (!DICT[a.key].isCore && DICT[b.key].isCore) return 1;
+                // 否则按热度降序
+                return b.currentPop - a.currentPop;
+            });
 
-            // 渲染仪表盘
             const dashArea = document.getElementById('dash-area');
             let diffColor = "#888"; 
             let diffArrow = "-";
@@ -237,7 +278,6 @@
                 </div>
             `;
 
-            // 渲染列表
             const listArea = document.getElementById('list-area');
             listArea.innerHTML = ""; 
 
@@ -262,11 +302,16 @@
                     barsHtml += `<div class="spark-bar" style="height:${h}%; background:${color}; opacity:${opacity}"></div>`;
                 });
 
+                // 🔥 V24: 核心据点添加特殊 CSS 类和标签
+                const coreClass = conf.isCore ? 'core-target' : '';
+                const coreTag = conf.isCore ? '<div class="core-tag">⭐ KEY INTEL</div>' : '';
+
                 listArea.innerHTML += `
-                <div class="card">
+                <div class="card ${coreClass}">
+                    ${coreTag}
                     <div class="row-top">
                         <div>
-                            <div class="shop-name">${conf.name}</div>
+                            <div class="shop-name" style="${conf.isCore ? 'color:var(--danger)' : ''}">${conf.name}</div>
                             <div class="shop-desc">${conf.desc}</div>
                         </div>
                         <div class="big-score" style="color: ${currentPop > 50 ? '#ff3b30' : '#fff'}">${currentPop}</div>
