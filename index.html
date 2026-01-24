@@ -3,179 +3,158 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>五角大楼披萨情报局</title>
+    <title>PENTAGON INTEL V5</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        :root {
-            --bg-dark: #0f172a;
-            --neon-blue: #38bdf8;
-            --neon-green: #4ade80;
-        }
+        :root { --bg: #000000; --card: #0a0a0a; --text: #e0e0e0; --accent: #00ff41; --danger: #ff0055; }
         body {
-            background-color: var(--bg-dark);
-            background-image: radial-gradient(circle at top center, #1e293b 0%, #0f172a 70%);
-            color: #e2e8f0;
-            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "PingFang SC", sans-serif;
-            margin: 0;
-            padding: 20px 15px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            box-sizing: border-box;
+            background-color: var(--bg); color: var(--text);
+            font-family: 'Courier New', Courier, monospace; /* 黑客风格字体 */
+            margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column;
+            overflow: hidden;
         }
-
-        /* 标题区域 */
-        header { text-align: center; margin-bottom: 20px; margin-top: 10px; }
-        h1 {
-            font-weight: 300; letter-spacing: 1px; margin: 0;
-            font-size: 1.6rem;
-            text-shadow: 0 0 15px rgba(56, 189, 248, 0.5);
+        
+        /* 顶部 KPI 战术面板 */
+        .dashboard-header {
+            padding: 10px 15px; background: #050505; border-bottom: 1px solid #333;
+            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
         }
-        .subtitle {
-            color: #94a3b8; font-size: 0.75rem; font-family: monospace; opacity: 0.8; margin-top: 5px; display: block;
+        .kpi-card {
+            background: var(--card); border: 1px solid #333; padding: 10px; border-radius: 4px;
+            display: flex; flex-direction: column; justify-content: center;
         }
-
-        /* 玻璃面板 */
-        .glass-panel {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.08);
-            border-radius: 20px;
-            padding: 15px;
-            width: 100%;
-            flex-grow: 1; /* 让面板占满剩余空间 */
-            max-height: 80vh; /* 防止太长 */
-            display: flex;
-            flex-direction: column;
-            position: relative;
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+        .kpi-label { font-size: 10px; color: #666; text-transform: uppercase; margin-bottom: 4px; }
+        .kpi-value { font-size: 16px; font-weight: bold; color: var(--accent); }
+        .kpi-value.danger { color: var(--danger); text-shadow: 0 0 5px var(--danger); }
+        
+        /* 标题栏 */
+        .status-bar {
+            padding: 5px 15px; font-size: 10px; color: #444; display: flex; justify-content: space-between;
+            background: #020202;
         }
-
-        /* 状态灯 (绝对定位，放到左上角避免遮挡) */
-        .status-badge {
-            position: absolute;
-            top: -35px; /* 移出面板，放在标题旁边 */
-            right: 0;
-            display: flex; align-items: center; gap: 6px;
-            font-size: 0.7rem; color: var(--neon-green);
-            background: rgba(15, 23, 42, 0.8);
-            padding: 4px 8px; border-radius: 12px;
-            border: 1px solid rgba(74, 222, 128, 0.2);
+        
+        /* 图表区 */
+        .chart-container { flex: 1; position: relative; padding: 10px; }
+        
+        /* 底部控制栏 */
+        .controls {
+            padding: 10px; display: flex; justify-content: center; gap: 10px; background: #050505;
         }
-        .dot {
-            width: 6px; height: 6px; background-color: var(--neon-green);
-            border-radius: 50%; box-shadow: 0 0 6px var(--neon-green);
-            animation: pulse 2s infinite;
+        .btn {
+            background: transparent; border: 1px solid #444; color: #888; padding: 5px 15px;
+            font-family: inherit; font-size: 10px; cursor: pointer;
         }
-        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
-
-        /* 图表容器 */
-        .chart-wrapper {
-            flex: 1;
-            position: relative;
-            width: 100%;
-            min-height: 300px; /* 保证在手机上不会被压扁 */
-        }
+        .btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
+        
+        /* 动画点 */
+        .live-dot { width: 8px; height: 8px; background: var(--danger); border-radius: 50%; box-shadow: 0 0 10px var(--danger); animation: blink 1s infinite; display: inline-block; margin-right: 5px; }
+        @keyframes blink { 50% { opacity: 0; } }
     </style>
 </head>
 <body>
+    <div class="status-bar">
+        <span>SYSTEM: ONLINE // ENCRYPTED</span>
+        <span>LOC: ARLINGTON, VA</span>
+    </div>
 
-    <header>
-        <div style="position: relative; display: inline-block; width: 100%;">
-            <h1>五角大楼指数</h1>
-            <div class="status-badge"><div class="dot"></div> 系统在线</div>
+    <div class="dashboard-header">
+        <div class="kpi-card">
+            <span class="kpi-label">Max Intensity</span>
+            <span class="kpi-value" id="max-pop">--</span>
         </div>
-        <span class="subtitle">LIVE INTELLIGENCE // VA, USA</span>
-    </header>
-
-    <div class="glass-panel">
-        <div class="chart-wrapper">
-            <canvas id="pizzaChart"></canvas>
+        <div class="kpi-card">
+            <span class="kpi-label">Active Threat</span>
+            <span class="kpi-value" id="threat-level">LOW</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label">Status</span>
+            <span class="kpi-value" style="color: #00ff41;">LIVE</span>
         </div>
     </div>
 
-    <script>
-        // 配置：针对手机优化的图表参数
-        const isMobile = window.innerWidth < 600;
+    <div class="chart-container">
+        <canvas id="mainChart"></canvas>
+    </div>
 
-        const nameMap = {
-            "District Pizza Palace": "特区披萨 (核心)",
-            "Domino's Pizza": "达美乐",
-            "Papa John's Pizza": "棒约翰",
-            "Wiseguy Pizza": "Wiseguy",
-            "We": "We Pizza",
-            "We, The Pizza": "We Pizza"
-        };
-        const colors = {
-            "District Pizza Palace": "#ff3366", 
-            "Domino's Pizza": "#00e5ff",       
-            "Papa John's Pizza": "#bf5af2",    
-            "Wiseguy Pizza": "#ffd60a",        
-            "We": "#32d74b",
-            "We, The Pizza": "#32d74b"
-        };
+    <div class="controls">
+        <button class="btn active" onclick="updateTime(24)">24H</button>
+        <button class="btn" onclick="updateTime(168)">7 DAYS</button>
+    </div>
+
+    <script>
+        let chart, rawData = [];
+        const colors = { "District Pizza Palace": "#ff0055", "Domino's Pizza": "#00ccff", "Papa John's Pizza": "#cc00ff", "Wiseguy Pizza": "#ffff00", "We": "#00ff41", "We, The Pizza": "#00ff41" };
 
         Papa.parse("pizza_data.csv", {
             download: true, header: true, skipEmptyLines: true,
-            complete: results => renderChart(results.data)
+            complete: res => {
+                rawData = res.data;
+                initChart();
+                updateTime(24);
+                updateKPI(); // 计算 KPI
+            }
         });
 
-        function renderChart(data) {
-            const shops = {}; const labelsSet = new Set();
-            data.forEach(row => {
-                if (!row['Timestamp (ET)']) return;
-                // 手机上只显示时间 "18:00"，不显示日期，节省空间
-                const timeStr = row['Timestamp (ET)'];
-                const timeLabel = isMobile ? timeStr.substring(11, 16) : timeStr.substring(5, 16);
-                
-                labelsSet.add(timeLabel);
-                const name = row.Name;
-                if (!shops[name]) shops[name] = [];
-                shops[name].push({ x: timeLabel, y: row['Live Popularity'] });
+        function updateKPI() {
+            // 计算最近24小时的最大热度
+            if(!rawData.length) return;
+            const now = moment();
+            const recent = rawData.filter(r => moment(r['Timestamp (ET)']).isAfter(now.clone().subtract(24, 'hours')));
+            
+            let maxVal = 0;
+            recent.forEach(r => {
+                const val = parseInt(r['Live Popularity']||0);
+                if(val > maxVal) maxVal = val;
+            });
+            
+            const maxEl = document.getElementById('max-pop');
+            maxEl.innerText = maxVal;
+            if(maxVal > 50) {
+                maxEl.classList.add('danger');
+                document.getElementById('threat-level').innerText = "HIGH";
+                document.getElementById('threat-level').style.color = "#ff0055";
+            }
+        }
+
+        function updateTime(hours) {
+            document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            const cutoff = moment().subtract(hours, 'hours');
+            const datasets = {};
+            
+            rawData.forEach(r => {
+                const t = moment(r['Timestamp (ET)']);
+                if(t.isBefore(cutoff)) return;
+                const n = r.Name;
+                if(!datasets[n]) datasets[n] = [];
+                datasets[n].push({x: t.valueOf(), y: r['Live Popularity']});
             });
 
-            const labels = Array.from(labelsSet).sort();
-            const datasets = Object.keys(shops).map(name => ({
-                label: nameMap[name] || name,
-                data: labels.map(t => shops[name].find(d => d.x === t)?.y || null),
-                borderColor: colors[name] || '#ccc',
-                backgroundColor: (colors[name] || '#ccc') + '10',
-                borderWidth: 2,
-                pointRadius: isMobile ? 2 : 3, // 手机上点小一点
-                tension: 0.3
+            chart.data.datasets = Object.keys(datasets).map(n => ({
+                label: n, data: datasets[n],
+                borderColor: colors[n]||'#fff', borderWidth: 1, pointRadius: 0,
+                tension: 0.2
             }));
+            
+            chart.options.scales.x.time.unit = hours > 24 ? 'day' : 'hour';
+            chart.update();
+        }
 
-            new Chart(document.getElementById('pizzaChart'), {
+        function initChart() {
+            chart = new Chart(document.getElementById('mainChart'), {
                 type: 'line',
-                data: { labels, datasets },
+                data: { datasets: [] },
                 options: {
-                    responsive: true,
-                    maintainAspectRatio: false, // 关键：允许拉伸高度
+                    responsive: true, maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: { 
-                            position: 'bottom', // 关键：图例放到底部！
-                            labels: { 
-                                color: '#94a3b8', 
-                                boxWidth: 10,
-                                font: { size: 11 }
-                            }
-                        },
-                        tooltip: { enabled: true }
-                    },
+                    plugins: { legend: { position: 'bottom', labels: { color: '#666', boxWidth: 8, font: {family: 'Courier New'} } } },
                     scales: {
-                        x: { 
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            ticks: { color: '#64748b', maxRotation: 0, font: {size: 10} }
-                        },
-                        y: { 
-                            grid: { color: 'rgba(255,255,255,0.05)' },
-                            beginAtZero: true, suggestedMax: 100,
-                            ticks: { color: '#64748b' }
-                        }
+                        x: { type: 'time', grid: { color: '#111' }, ticks: { color: '#666' } },
+                        y: { grid: { color: '#111' }, ticks: { color: '#666' }, beginAtZero: true, suggestedMax: 100 }
                     }
                 }
             });
