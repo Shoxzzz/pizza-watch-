@@ -9,133 +9,149 @@
     <style>
         :root { 
             --bg: #000000; 
-            --card-bg: #141414; 
+            --card-bg: #121212; 
+            --dash-bg: #1a1a1a;
             --text: #ffffff; 
-            --sub-text: #888888;
+            --sub-text: #666;
             --danger: #ff3b30;
             --warn: #ffcc00;
-            --safe: #34c759;
-            --blue: #007aff;
+            --safe: #32d74b;
+            --blue: #0a84ff;
         }
 
-        /* 🔥 关键修复：允许页面滚动 (overflow-y: auto) */
         html, body {
             background-color: var(--bg);
             color: var(--text);
             font-family: 'Noto Sans SC', sans-serif;
             margin: 0; padding: 0;
             width: 100%;
-            /* ⚠️ 之前这里是 hidden，导致滑不动。现在改为 auto！ */
             overflow-y: auto; 
-            -webkit-overflow-scrolling: touch; /* iOS 丝滑滚动 */
+            -webkit-overflow-scrolling: touch;
         }
 
-        /* 顶部导航 (吸附效果) */
+        /* 顶部导航 */
         .header {
             padding: 16px 20px;
-            background: rgba(20, 20, 20, 0.95);
+            background: rgba(10, 10, 10, 0.95);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
             border-bottom: 1px solid #222;
-            /* 粘性定位：划上去时吸顶 */
-            position: sticky; 
-            top: 0; 
-            z-index: 999;
+            position: sticky; top: 0; z-index: 999;
             display: flex; justify-content: space-between; align-items: center;
         }
-        .title { font-size: 18px; font-weight: 900; letter-spacing: 1px; }
-        .status-badge {
-            font-size: 12px; font-weight: bold; color: var(--safe);
-            background: rgba(52, 199, 89, 0.15);
-            padding: 4px 10px; border-radius: 100px;
+        .title { font-size: 16px; font-weight: 900; letter-spacing: 1px; color: #fff; }
+        .live-badge {
+            font-size: 11px; font-weight: bold; color: var(--safe);
+            background: rgba(50, 215, 75, 0.1);
+            padding: 4px 8px; border-radius: 4px;
             display: flex; align-items: center; gap: 6px;
         }
-        .blink { width: 6px; height: 6px; background: currentColor; border-radius: 50%; animation: blink 1.5s infinite; }
+        .blink { width: 6px; height: 6px; background: currentColor; border-radius: 50%; animation: blink 2s infinite; }
         @keyframes blink { 0% {opacity:1} 50% {opacity:0.3} 100% {opacity:1} }
 
-        /* 列表容器 */
-        .container { 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 16px; 
-            /* 底部留白，防止被手机横条遮挡 */
-            padding-bottom: 80px; 
-        }
+        .container { padding: 15px; display: flex; flex-direction: column; gap: 15px; padding-bottom: 80px; }
 
-        /* 战术卡片 */
+        /* 🔥 新增：总指挥仪表盘 */
+        .dashboard-grid {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 10px;
+            margin-bottom: 5px;
+        }
+        .dash-card {
+            background: var(--dash-bg);
+            border: 1px solid #333;
+            border-radius: 12px;
+            padding: 15px;
+            display: flex; flex-direction: column; justify-content: center;
+            position: relative; overflow: hidden;
+        }
+        /* 仪表盘背景光效 */
+        .dash-glow {
+            position: absolute; top: -50%; right: -50%; width: 100%; height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.05) 0%, transparent 60%);
+            pointer-events: none;
+        }
+        .dash-lbl { font-size: 11px; color: #888; text-transform: uppercase; font-weight: bold; margin-bottom: 4px; }
+        .dash-val { font-size: 26px; font-weight: 900; line-height: 1; }
+        .dash-sub { font-size: 11px; margin-top: 4px; font-weight: 500; }
+
+        /* 分店战术卡片 */
         .card {
             background: var(--card-bg);
-            border: 1px solid #333;
-            border-radius: 16px;
-            padding: 20px;
+            border: 1px solid #2a2a2a;
+            border-radius: 12px;
+            padding: 16px;
             display: flex; flex-direction: column; gap: 12px;
-            position: relative;
         }
 
-        .card-header { display: flex; justify-content: space-between; align-items: flex-start; }
-        .shop-name { font-size: 18px; font-weight: 700; margin-bottom: 4px; color: #fff; }
-        .shop-desc { font-size: 12px; color: var(--sub-text); }
+        .row-top { display: flex; justify-content: space-between; align-items: flex-start; }
+        .shop-name { font-size: 16px; font-weight: 700; color: #fff; margin-bottom: 2px; }
+        .shop-desc { font-size: 11px; color: var(--sub-text); }
+        .big-score { font-size: 28px; font-weight: 900; line-height: 1; letter-spacing: -1px; }
+
+        .row-stats { 
+            display: flex; gap: 10px; 
+            padding: 10px; background: #080808; border-radius: 8px; 
+            border: 1px solid #222;
+        }
+        .stat-box { flex: 1; display: flex; flex-direction: column; gap: 2px; }
+        .stat-lbl { font-size: 10px; color: #555; }
+        .stat-val { font-size: 13px; font-weight: 700; }
+
+        .spark-container {
+            display: flex; align-items: flex-end; gap: 2px;
+            height: 30px; 
+            margin-top: 5px;
+            padding-top: 10px;
+            border-top: 1px dashed #222;
+        }
+        .spark-bar { flex: 1; background: #333; border-radius: 2px; min-height: 2px; }
+
+        .c-red { color: var(--danger); }
+        .c-green { color: var(--safe); }
+        .c-gray { color: #888; }
         
-        .pop-score { font-size: 32px; font-weight: 900; line-height: 1; }
-        .pop-label { font-size: 10px; color: var(--sub-text); text-align: right; margin-top: 4px; }
-
-        .progress-bg { width: 100%; height: 6px; background: #333; border-radius: 3px; overflow: hidden; }
-        .progress-bar { height: 100%; border-radius: 3px; transition: width 0.5s ease; }
-
-        .card-footer { display: flex; justify-content: space-between; align-items: center; font-size: 12px; color: var(--sub-text); padding-top: 4px; }
-
-        /* 颜色类 */
-        .bg-red { background-color: var(--danger); }
-        .bg-blue { background-color: var(--blue); }
-        .bg-green { background-color: var(--safe); }
-        .bg-yellow { background-color: var(--warn); }
-        
-        .text-red { color: var(--danger); }
-        .text-white { color: #fff; }
-
-        .loading { text-align: center; margin-top: 50px; color: #666; font-size: 14px; }
+        .loading { text-align: center; margin-top: 50px; color: #444; font-size: 12px; }
     </style>
 </head>
 <body>
 
     <div class="header">
         <div class="title">五角大楼情报局</div>
-        <div class="status-badge"><div class="blink"></div>实时监控</div>
+        <div class="live-badge"><div class="blink"></div>LIVE</div>
     </div>
 
-    <div class="container" id="list-area">
-        <div class="loading">正在连接卫星数据...<br>解析中文数据包...</div>
+    <div class="container">
+        <div id="dash-area"></div>
+        
+        <div id="list-area">
+            <div class="loading">正在汇总各分部数据...</div>
+        </div>
     </div>
 
     <script>
         const DICT = {
-            "District": { name: "特区披萨", desc: "核心据点 (五角大楼首选)", color: "bg-red" },
-            "Domino":   { name: "达美乐",   desc: "外卖巨头 (常规)",        color: "bg-blue" },
-            "Papa":     { name: "棒约翰",   desc: "外卖巨头 (备选)",        color: "bg-blue" },
-            "Wiseguy":  { name: "Wiseguy",  desc: "切片披萨店 (散客)",      color: "bg-yellow" },
-            "We":       { name: "We披萨",   desc: "水晶城分部",            color: "bg-green" }
+            "District": { name: "特区披萨", desc: "核心据点" },
+            "Domino":   { name: "达美乐",   desc: "外卖巨头" },
+            "Papa":     { name: "棒约翰",   desc: "外卖备选" },
+            "Wiseguy":  { name: "Wiseguy",  desc: "切片散客" },
+            "We":       { name: "We披萨",   desc: "水晶城" }
         };
 
         Papa.parse("pizza_data.csv", {
             download: true, header: true, skipEmptyLines: true,
             complete: function(res) {
-                renderList(res.data);
+                render(res.data);
             },
             error: function() {
-                document.getElementById('list-area').innerHTML = '<div class="loading">读取失败</div>';
+                document.getElementById('list-area').innerHTML = '<div class="loading">数据连接失败</div>';
             }
         });
 
-        function renderList(data) {
+        function render(data) {
             if(!data || data.length === 0) return;
 
-            const latest = {};
-            // 倒序找最新数据
-            for(let i = data.length - 1; i >= 0; i--) {
-                const row = data[i];
+            const groups = {};
+            data.forEach(row => {
                 const rawName = row.Name || "";
-                
                 let key = null;
                 if(rawName.includes("District")) key = "District";
                 else if(rawName.includes("Domino")) key = "Domino";
@@ -143,63 +159,131 @@
                 else if(rawName.includes("Wiseguy")) key = "Wiseguy";
                 else if(rawName.includes("We")) key = "We";
 
-                if(key && !latest[key]) {
-                    latest[key] = {
+                if(key) {
+                    if(!groups[key]) groups[key] = [];
+                    groups[key].push({
                         pop: parseInt(row['Live Popularity'] || 0),
-                        gap: parseInt(row['Gap'] || 0),
                         time: row['Timestamp (ET)']
-                    };
+                    });
                 }
-                if(Object.keys(latest).length === 5) break;
-            }
+            });
 
-            // 按热度排序
-            const list = Object.keys(latest).map(k => ({ key: k, ...latest[k] }))
-                                          .sort((a, b) => b.pop - a.pop);
+            // --- 🧮 1. 全局数据计算 ---
+            let totalLivePop = 0; // 当前全网总人数
+            let totalDiff = 0;    // 当前全网 1小时 变化量
+            let sortedKeys = [];
 
-            const area = document.getElementById('list-area');
-            area.innerHTML = ""; 
-
-            list.forEach(item => {
-                const conf = DICT[item.key];
-                const pop = item.pop;
-                const gap = item.gap;
+            // 先预处理所有店，算出总数，顺便准备排序
+            const shopDataList = [];
+            Object.keys(groups).forEach(key => {
+                const history = groups[key];
+                if(history.length === 0) return;
                 
-                let timeStr = item.time;
-                if(timeStr.includes(" ")) timeStr = timeStr.split(" ")[1].substring(0, 5);
+                const current = history[history.length - 1];
+                const currentPop = current.pop;
 
-                let statusHtml = `<span style="color:#666">平稳 (正常)</span>`;
-                if (gap >= 20) statusHtml = `<span style="color:var(--danger)">🔥 激增 (+${gap})</span>`;
-                else if (gap > 5) statusHtml = `<span style="color:var(--warn)">📈 上升 (+${gap})</span>`;
-                else if (gap < -5) statusHtml = `<span style="color:var(--safe)">📉 下降 (${gap})</span>`;
+                // 计算单店变化
+                let diff = 0;
+                if(history.length >= 2) {
+                    diff = currentPop - history[history.length - 2].pop;
+                }
 
-                const scoreColor = pop > 50 ? 'text-red' : 'text-white';
+                // 累加到总数
+                totalLivePop += currentPop;
+                totalDiff += diff;
 
-                const html = `
+                shopDataList.push({ key, history, currentPop, diff, current });
+            });
+
+            // 按热度降序排序
+            shopDataList.sort((a, b) => b.currentPop - a.currentPop);
+
+            // --- 🎨 2. 渲染顶部总仪表盘 (Dashboard) ---
+            const dashArea = document.getElementById('dash-area');
+            
+            // 总变化的颜色逻辑
+            let diffColor = "#888"; 
+            let diffArrow = "-";
+            if(totalDiff > 0) { diffColor = "var(--danger)"; diffArrow = "▲ +"; }
+            else if(totalDiff < 0) { diffColor = "var(--safe)"; diffArrow = "▼ "; }
+
+            // 总热度如果太高，显示红色
+            let totalColor = totalLivePop > 150 ? "var(--danger)" : "#fff";
+
+            dashArea.innerHTML = `
+                <div class="dashboard-grid">
+                    <div class="dash-card">
+                        <div class="dash-glow"></div>
+                        <div class="dash-lbl">全网实时总热度</div>
+                        <div class="dash-val" style="color:${totalColor}">${totalLivePop}</div>
+                        <div class="dash-sub" style="color:#666">5个据点汇总</div>
+                    </div>
+                    <div class="dash-card">
+                        <div class="dash-glow"></div>
+                        <div class="dash-lbl">1H 总变化量</div>
+                        <div class="dash-val" style="color:${diffColor}">${diffArrow}${Math.abs(totalDiff)}</div>
+                        <div class="dash-sub" style="color:${diffColor}">较1小时前</div>
+                    </div>
+                </div>
+            `;
+
+            // --- 🎨 3. 渲染分店列表 ---
+            const listArea = document.getElementById('list-area');
+            listArea.innerHTML = ""; 
+
+            shopDataList.forEach(item => {
+                const { key, history, currentPop, diff, current } = item;
+                const conf = DICT[key];
+
+                // 单店变化显示
+                let diffHtml = `<span class="c-gray">--</span>`;
+                if(diff > 0) diffHtml = `<span class="c-red">▲ +${diff}</span>`;
+                else if(diff < 0) diffHtml = `<span class="c-green">▼ ${diff}</span>`;
+
+                // 24H 峰值
+                const last24 = history.slice(-24);
+                const maxPop = Math.max(...last24.map(i => i.pop));
+
+                // 迷你柱状图
+                const sparkData = history.slice(-20); 
+                let barsHtml = "";
+                sparkData.forEach((d, idx) => {
+                    const isLast = idx === sparkData.length - 1;
+                    const h = Math.max(5, d.pop);
+                    const color = isLast ? '#fff' : (d.pop > 50 ? '#ff3b30' : '#333');
+                    const opacity = isLast ? 1 : 0.6;
+                    barsHtml += `<div class="spark-bar" style="height:${h}%; background:${color}; opacity:${opacity}"></div>`;
+                });
+
+                listArea.innerHTML += `
                 <div class="card">
-                    <div class="card-header">
+                    <div class="row-top">
                         <div>
                             <div class="shop-name">${conf.name}</div>
                             <div class="shop-desc">${conf.desc}</div>
                         </div>
-                        <div>
-                            <div class="pop-score ${scoreColor}">${pop}</div>
-                            <div class="pop-label">当前热度</div>
+                        <div class="big-score" style="color: ${currentPop > 50 ? '#ff3b30' : '#fff'}">${currentPop}</div>
+                    </div>
+                    <div class="row-stats">
+                        <div class="stat-box">
+                            <div class="stat-lbl">1H 变化</div>
+                            <div class="stat-val">${diffHtml}</div>
+                        </div>
+                        <div class="stat-box" style="border-left:1px solid #222; padding-left:10px;">
+                            <div class="stat-lbl">24H 峰值</div>
+                            <div class="stat-val" style="color:#fff">${maxPop}</div>
+                        </div>
+                        <div class="stat-box" style="border-left:1px solid #222; padding-left:10px;">
+                            <div class="stat-lbl">更新于</div>
+                            <div class="stat-val" style="color:#888">${current.time.split(" ")[1].substring(0,5)}</div>
                         </div>
                     </div>
-                    <div class="progress-bg">
-                        <div class="progress-bar ${conf.color}" style="width: ${pop}%"></div>
-                    </div>
-                    <div class="card-footer">
-                        <div>${statusHtml}</div>
-                        <div>更新于 ${timeStr}</div>
-                    </div>
+                    <div class="spark-container">${barsHtml}</div>
                 </div>
                 `;
-                area.innerHTML += html;
             });
             
-            area.innerHTML += `<div style="text-align:center; font-size:10px; color:#333; margin-top:10px;">PENTAGON OPS V18 // SCROLL UNLOCKED</div>`;
+            listArea.innerHTML += `<div style="text-align:center; font-size:10px; color:#333; margin-top:10px;">PENTAGON OPS V20 // GLOBAL VIEW</div>`;
         }
     </script>
 </body>
