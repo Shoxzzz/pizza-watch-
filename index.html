@@ -3,160 +3,277 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PENTAGON INTEL V5</title>
+    <title>PENTAGON OPS</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.4/moment.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-moment@1.0.1/dist/chartjs-adapter-moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        :root { --bg: #000000; --card: #0a0a0a; --text: #e0e0e0; --accent: #00ff41; --danger: #ff0055; }
+        /* 🎨 全局变量：黑金配色 */
+        :root {
+            --bg-color: #000000;
+            --card-bg: rgba(28, 28, 30, 0.6);
+            --text-main: #ffffff;
+            --text-sub: #8e8e93;
+            --accent: #0a84ff;
+            --danger: #ff453a;
+            --success: #30d158;
+            --blur: 20px;
+        }
+
         body {
-            background-color: var(--bg); color: var(--text);
-            font-family: 'Courier New', Courier, monospace; /* 黑客风格字体 */
-            margin: 0; padding: 0; height: 100vh; display: flex; flex-direction: column;
+            background-color: var(--bg-color);
+            /* 极光背景动画 */
+            background-image: 
+                radial-gradient(circle at 0% 0%, #1a1a2e 0%, transparent 50%),
+                radial-gradient(circle at 100% 100%, #150015 0%, transparent 50%);
+            color: var(--text-main);
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            margin: 0; padding: 0;
+            height: 100vh;
+            display: flex; flex-direction: column;
             overflow: hidden;
         }
-        
-        /* 顶部 KPI 战术面板 */
-        .dashboard-header {
-            padding: 10px 15px; background: #050505; border-bottom: 1px solid #333;
-            display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px;
+
+        /* 📱 顶部导航栏 */
+        .navbar {
+            padding: 20px 24px;
+            display: flex; justify-content: space-between; align-items: center;
+            backdrop-filter: blur(var(--blur));
+            -webkit-backdrop-filter: blur(var(--blur));
+            border-bottom: 1px solid rgba(255,255,255,0.05);
+            z-index: 10;
+        }
+        .brand {
+            font-size: 18px; font-weight: 600; letter-spacing: -0.5px;
+            background: linear-gradient(90deg, #fff, #888);
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+        }
+        .live-tag {
+            font-size: 11px; font-weight: 600; color: var(--success);
+            background: rgba(48, 209, 88, 0.15);
+            padding: 4px 10px; border-radius: 20px;
+            display: flex; align-items: center; gap: 6px;
+        }
+        .pulse { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: pulse 2s infinite; }
+        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+
+        /* 📊 KPI 概览卡片 */
+        .kpi-row {
+            display: flex; gap: 12px; padding: 16px 24px;
+            overflow-x: auto; /* 允许横向滑动 */
+            scrollbar-width: none; /* 隐藏滚动条 */
         }
         .kpi-card {
-            background: var(--card); border: 1px solid #333; padding: 10px; border-radius: 4px;
-            display: flex; flex-direction: column; justify-content: center;
+            background: var(--card-bg);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 16px;
+            padding: 12px 16px;
+            min-width: 100px;
+            flex: 1;
         }
-        .kpi-label { font-size: 10px; color: #666; text-transform: uppercase; margin-bottom: 4px; }
-        .kpi-value { font-size: 16px; font-weight: bold; color: var(--accent); }
-        .kpi-value.danger { color: var(--danger); text-shadow: 0 0 5px var(--danger); }
+        .kpi-label { font-size: 11px; color: var(--text-sub); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
+        .kpi-value { font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
         
-        /* 标题栏 */
-        .status-bar {
-            padding: 5px 15px; font-size: 10px; color: #444; display: flex; justify-content: space-between;
-            background: #020202;
+        /* 📈 图表核心区 */
+        .chart-wrapper {
+            flex: 1;
+            position: relative;
+            margin: 0 16px 16px 16px;
+            background: var(--card-bg);
+            border-radius: 24px;
+            border: 1px solid rgba(255,255,255,0.05);
+            padding: 16px;
+            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
         }
-        
-        /* 图表区 */
-        .chart-container { flex: 1; position: relative; padding: 10px; }
-        
-        /* 底部控制栏 */
-        .controls {
-            padding: 10px; display: flex; justify-content: center; gap: 10px; background: #050505;
+
+        /* 🏷️ 底部滑动图例 */
+        .legend-scroll {
+            padding: 0 24px 30px 24px;
+            display: flex; gap: 10px; overflow-x: auto;
+            flex-shrink: 0;
         }
-        .btn {
-            background: transparent; border: 1px solid #444; color: #888; padding: 5px 15px;
-            font-family: inherit; font-size: 10px; cursor: pointer;
+        .legend-pill {
+            background: rgba(255,255,255,0.08);
+            border-radius: 20px;
+            padding: 6px 14px;
+            font-size: 12px;
+            color: #ccc;
+            white-space: nowrap;
+            display: flex; align-items: center; gap: 6px;
+            border: 1px solid transparent;
+            transition: all 0.2s;
         }
-        .btn.active { background: var(--accent); color: #000; border-color: var(--accent); }
-        
-        /* 动画点 */
-        .live-dot { width: 8px; height: 8px; background: var(--danger); border-radius: 50%; box-shadow: 0 0 10px var(--danger); animation: blink 1s infinite; display: inline-block; margin-right: 5px; }
-        @keyframes blink { 50% { opacity: 0; } }
+        .legend-pill.active { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.2); color: #fff; }
+        .dot { width: 8px; height: 8px; border-radius: 50%; }
+
     </style>
 </head>
 <body>
-    <div class="status-bar">
-        <span>SYSTEM: ONLINE // ENCRYPTED</span>
-        <span>LOC: ARLINGTON, VA</span>
+
+    <div class="navbar">
+        <div class="brand">PENTAGON OPS</div>
+        <div class="live-tag"><div class="pulse"></div> LIVE</div>
     </div>
 
-    <div class="dashboard-header">
+    <div class="kpi-row">
         <div class="kpi-card">
-            <span class="kpi-label">Max Intensity</span>
-            <span class="kpi-value" id="max-pop">--</span>
+            <div class="kpi-label">Max Peak</div>
+            <div class="kpi-value" id="max-val">--</div>
         </div>
         <div class="kpi-card">
-            <span class="kpi-label">Active Threat</span>
-            <span class="kpi-value" id="threat-level">LOW</span>
+            <div class="kpi-label">Alert Level</div>
+            <div class="kpi-value" id="alert-lvl" style="color:var(--success)">LOW</div>
         </div>
         <div class="kpi-card">
-            <span class="kpi-label">Status</span>
-            <span class="kpi-value" style="color: #00ff41;">LIVE</span>
+            <div class="kpi-label">Active Spots</div>
+            <div class="kpi-value">5</div>
         </div>
     </div>
 
-    <div class="chart-container">
+    <div class="chart-wrapper">
         <canvas id="mainChart"></canvas>
     </div>
 
-    <div class="controls">
-        <button class="btn active" onclick="updateTime(24)">24H</button>
-        <button class="btn" onclick="updateTime(168)">7 DAYS</button>
-    </div>
+    <div class="legend-scroll" id="legend-container">
+        </div>
 
     <script>
-        let chart, rawData = [];
-        const colors = { "District Pizza Palace": "#ff0055", "Domino's Pizza": "#00ccff", "Papa John's Pizza": "#cc00ff", "Wiseguy Pizza": "#ffff00", "We": "#00ff41", "We, The Pizza": "#00ff41" };
+        // 🎨 苹果级配色方案
+        const colors = {
+            "District Pizza Palace": "#ff3b30", // Apple Red
+            "Domino's Pizza": "#0a84ff",       // Apple Blue
+            "Papa John's Pizza": "#bf5af2",    // Apple Purple
+            "Wiseguy Pizza": "#ffd60a",        // Apple Yellow
+            "We": "#32d74b",                   // Apple Green
+            "We, The Pizza": "#32d74b"
+        };
+
+        const shortNames = {
+            "District Pizza Palace": "特区披萨",
+            "Domino's Pizza": "达美乐",
+            "Papa John's Pizza": "棒约翰",
+            "Wiseguy Pizza": "Wiseguy",
+            "We": "We Pizza",
+            "We, The Pizza": "We Pizza"
+        };
 
         Papa.parse("pizza_data.csv", {
             download: true, header: true, skipEmptyLines: true,
-            complete: res => {
-                rawData = res.data;
-                initChart();
-                updateTime(24);
-                updateKPI(); // 计算 KPI
+            complete: function(results) {
+                renderDashboard(results.data);
             }
         });
 
-        function updateKPI() {
-            // 计算最近24小时的最大热度
-            if(!rawData.length) return;
-            const now = moment();
-            const recent = rawData.filter(r => moment(r['Timestamp (ET)']).isAfter(now.clone().subtract(24, 'hours')));
-            
-            let maxVal = 0;
-            recent.forEach(r => {
-                const val = parseInt(r['Live Popularity']||0);
-                if(val > maxVal) maxVal = val;
+        function renderDashboard(data) {
+            const series = {};
+            const labelsSet = new Set();
+            let globalMax = 0;
+
+            // 1. 数据清洗
+            data.forEach(row => {
+                const rawTime = row['Timestamp (ET)'];
+                const name = row.Name;
+                const pop = parseInt(row['Live Popularity']);
+                
+                if (!rawTime || !name) return;
+                
+                // 智能时间截取 (只取 HH:mm)
+                const timeLabel = rawTime.includes(" ") ? rawTime.split(" ")[1].substring(0, 5) : rawTime;
+                
+                labelsSet.add(timeLabel);
+                if (!series[name]) series[name] = [];
+                series[name].push({ x: timeLabel, y: isNaN(pop) ? 0 : pop });
+
+                // 更新 KPI
+                if(pop > globalMax) globalMax = pop;
             });
-            
-            const maxEl = document.getElementById('max-pop');
-            maxEl.innerText = maxVal;
-            if(maxVal > 50) {
-                maxEl.classList.add('danger');
-                document.getElementById('threat-level').innerText = "HIGH";
-                document.getElementById('threat-level').style.color = "#ff0055";
+
+            // 2. 更新 KPI 面板
+            document.getElementById('max-val').innerText = globalMax;
+            if(globalMax > 50) {
+                const el = document.getElementById('alert-lvl');
+                el.innerText = "HIGH";
+                el.style.color = "var(--danger)";
             }
-        }
 
-        function updateTime(hours) {
-            document.querySelectorAll('.btn').forEach(b => b.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            const cutoff = moment().subtract(hours, 'hours');
-            const datasets = {};
-            
-            rawData.forEach(r => {
-                const t = moment(r['Timestamp (ET)']);
-                if(t.isBefore(cutoff)) return;
-                const n = r.Name;
-                if(!datasets[n]) datasets[n] = [];
-                datasets[n].push({x: t.valueOf(), y: r['Live Popularity']});
+            const labels = Array.from(labelsSet).sort();
+
+            // 3. 构建发光曲线
+            const datasets = Object.keys(series).map(name => {
+                const c = colors[name] || '#999';
+                const alignedData = labels.map(lbl => {
+                    const pt = series[name].find(p => p.x === lbl);
+                    return pt ? pt.y : null;
+                });
+
+                return {
+                    label: name,
+                    data: alignedData,
+                    borderColor: c,
+                    backgroundColor: c, // 用于 Hover 时的颜色
+                    borderWidth: 2,
+                    tension: 0.4, // 丝滑曲线
+                    pointRadius: 0, // 平时隐藏点
+                    pointHoverRadius: 6,
+                    pointBackgroundColor: '#000',
+                    pointBorderColor: c,
+                    pointBorderWidth: 2,
+                    spanGaps: true,
+                    // ✨ 关键：阴影制造发光感
+                    shadowColor: c,
+                    shadowBlur: 10
+                };
             });
 
-            chart.data.datasets = Object.keys(datasets).map(n => ({
-                label: n, data: datasets[n],
-                borderColor: colors[n]||'#fff', borderWidth: 1, pointRadius: 0,
-                tension: 0.2
-            }));
-            
-            chart.options.scales.x.time.unit = hours > 24 ? 'day' : 'hour';
-            chart.update();
-        }
-
-        function initChart() {
-            chart = new Chart(document.getElementById('mainChart'), {
+            // 4. 初始化图表
+            const ctx = document.getElementById('mainChart').getContext('2d');
+            new Chart(ctx, {
                 type: 'line',
-                data: { datasets: [] },
+                data: { labels, datasets },
                 options: {
-                    responsive: true, maintainAspectRatio: false,
+                    responsive: true,
+                    maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
-                    plugins: { legend: { position: 'bottom', labels: { color: '#666', boxWidth: 8, font: {family: 'Courier New'} } } },
+                    plugins: {
+                        legend: { display: false }, // 隐藏默认图例
+                        tooltip: {
+                            backgroundColor: 'rgba(28, 28, 30, 0.9)',
+                            titleColor: '#fff',
+                            bodyColor: '#ccc',
+                            titleFont: { family: 'Inter', size: 13 },
+                            bodyFont: { family: 'Inter', size: 12 },
+                            padding: 12,
+                            cornerRadius: 8,
+                            displayColors: true
+                        }
+                    },
                     scales: {
-                        x: { type: 'time', grid: { color: '#111' }, ticks: { color: '#666' } },
-                        y: { grid: { color: '#111' }, ticks: { color: '#666' }, beginAtZero: true, suggestedMax: 100 }
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#666', font: {family:'Inter', size:10}, maxTicksLimit: 5, maxRotation: 0 }
+                        },
+                        y: {
+                            grid: { color: 'rgba(255,255,255,0.05)', borderDash: [4, 4] },
+                            ticks: { display: false }, // 隐藏Y轴数字，更简洁
+                            beginAtZero: true,
+                            suggestedMax: 100
+                        }
                     }
                 }
+            });
+
+            // 5. 生成底部胶囊图例
+            const legCont = document.getElementById('legend-container');
+            Object.keys(series).forEach(name => {
+                const c = colors[name] || '#999';
+                const n = shortNames[name] || name.split(" ")[0];
+                
+                legCont.innerHTML += `
+                    <div class="legend-pill">
+                        <div class="dot" style="background:${c}; box-shadow: 0 0 6px ${c}"></div>
+                        ${n}
+                    </div>
+                `;
             });
         }
     </script>
