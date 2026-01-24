@@ -3,51 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>PENTAGON OPS FINAL</title>
+    <title>五角大楼情报 V14</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        :root { --bg: #000; --card: #121212; --text: #fff; --sub: #888; --danger: #ff453a; --success: #30d158; }
+        :root { --bg: #000; --card: #151515; --text: #fff; --sub: #888; --danger: #ff453a; --warn: #ff9f0a; --success: #30d158; }
         body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
+        
         .header { padding: 12px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid #222; }
-        .brand { font-weight: 700; font-size: 16px; }
+        .brand { font-weight: 700; font-size: 16px; letter-spacing: 1px; }
         .live { color: var(--success); font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
         .dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: p 1s infinite; } @keyframes p { 50% { opacity: 0.3; } }
         
+        /* 这里的卡片支持横向滑动，防止中文太长换行 */
         .kpi-scroll { display: flex; gap: 10px; padding: 15px 20px; overflow-x: auto; flex-shrink: 0; }
-        .card { background: var(--card); border: 1px solid #333; border-radius: 10px; padding: 10px 15px; min-width: 100px; }
-        .lbl { font-size: 10px; color: var(--sub); text-transform: uppercase; margin-bottom: 5px; }
-        .val { font-size: 22px; font-weight: 700; }
+        .kpi-scroll::-webkit-scrollbar { display: none; }
+        .card { background: var(--card); border: 1px solid #333; border-radius: 10px; padding: 12px 16px; min-width: 130px; }
+        
+        /* 强制全中文标签样式 */
+        .lbl { font-size: 11px; color: var(--sub); font-weight: bold; margin-bottom: 5px; letter-spacing: 0.5px; }
+        .val { font-size: 20px; font-weight: 700; }
+        .sub-val { font-size: 10px; margin-top: 4px; font-weight: 500; }
 
         .chart-wrap { flex: 1; margin: 0 10px; background: #080808; border-radius: 15px; position: relative; }
         .leg-bar { padding: 15px 20px; display: flex; gap: 8px; overflow-x: auto; border-top: 1px solid #222; flex-shrink: 0; }
-        .pill { background: #1a1a1a; padding: 5px 10px; border-radius: 6px; font-size: 11px; color: #ccc; white-space: nowrap; border-left: 3px solid transparent; }
+        .pill { background: #1a1a1a; padding: 6px 10px; border-radius: 6px; font-size: 11px; color: #ccc; white-space: nowrap; border-left: 3px solid transparent; display: flex; align-items: center; }
     </style>
 </head>
 <body>
     <div class="header">
-        <div class="brand">PENTAGON V10</div>
-        <div class="live"><div class="dot"></div>SYNCED</div>
+        <div class="brand">五角大楼情报局</div>
+        <div class="live"><div class="dot"></div>实时监控中</div>
     </div>
 
     <div class="kpi-scroll">
-        <div class="card"><div class="lbl">Max Peak</div><div class="val" id="v-max">--</div></div>
-        <div class="card"><div class="lbl">Status</div><div class="val" id="v-stat" style="color:var(--success)">LOW</div></div>
-        <div class="card"><div class="lbl">Points</div><div class="val" id="v-pts">0</div></div>
+        <div class="card">
+            <div class="lbl">⚡️ 异常波动 (Gap)</div>
+            <div class="val" id="v-gap">--</div>
+            <div class="sub-val" id="v-gap-desc" style="color:#666">分析中...</div>
+        </div>
+        
+        <div class="card">
+            <div class="lbl">📈 实时峰值 (Max)</div>
+            <div class="val" id="v-max">--</div>
+        </div>
+        
+        <div class="card">
+            <div class="lbl">🚨 威胁等级 (Level)</div>
+            <div class="val" id="v-stat" style="color:var(--success)">低 (正常)</div>
+        </div>
+
+        <div class="card">
+            <div class="lbl">📊 采样点数</div>
+            <div class="val" id="v-pts">0</div>
+        </div>
     </div>
 
     <div class="chart-wrap"><canvas id="C"></canvas></div>
     <div class="leg-bar" id="Leg"></div>
 
     <script>
-        // ⚡️ 这里是中文显示的命根子！必须和Python的 Key 完全一致
-        const CFG = {
-            "District": { c: "#ff453a", n: "特区披萨" },
-            "Dominos":  { c: "#0a84ff", n: "达美乐" },
-            "Papa":     { c: "#bf5af2", n: "棒约翰" },
-            "Wiseguy":  { c: "#ffd60a", n: "Wiseguy" },
-            "WePizza":  { c: "#30d158", n: "We Pizza" }
+        // ⚡️ 核心改动：不再依赖 Python 的名字，前端自己定义一套标准
+        // 只要 CSV 里的名字包含关键词，就强制显示成这里的中文
+        const DICT = {
+            "District": { c: "#ff453a", n: "特区披萨 (核心)" },
+            "Domino":   { c: "#0a84ff", n: "达美乐 (外卖)" },
+            "Papa":     { c: "#bf5af2", n: "棒约翰 (外卖)" },
+            "Wiseguy":  { c: "#ffd60a", n: "Wiseguy (切片)" },
+            "We":       { c: "#30d158", n: "We披萨 (水晶城)" }
         };
 
         Papa.parse("pizza_data.csv", {
@@ -56,51 +80,74 @@
         });
 
         function render(data) {
-            const grps = {}; let max = 0;
+            const grps = {}; let max = 0; let maxGap = -999;
             
             data.forEach(r => {
                 let t = r['Timestamp (ET)'];
-                let n = r.Name; 
+                let rawName = r.Name; 
                 let p = parseInt(r['Live Popularity']||0);
-                
-                // 🚑 兼容性补丁：如果CSV里是旧的长名字，强行转换成新的短代码
-                // 这样你的旧数据也能显示中文了！
-                if(n.includes("District")) n = "District";
-                else if(n.includes("Domino")) n = "Dominos";
-                else if(n.includes("Papa")) n = "Papa";
-                else if(n.includes("We")) n = "WePizza";
-                else if(n.includes("Wiseguy")) n = "Wiseguy";
+                let gap = parseInt(r['Gap']||0); // 获取异常偏差
 
-                if(!t || !CFG[n]) return; 
+                if(!t || !rawName) return;
 
-                // 时间截取
+                // 🔪 暴力匹配逻辑：只要包含关键词，就认领！
+                // 这样无论 Python 存的是 "Domino's" 还是 "Dominos"，都会变成中文
+                let key = null;
+                if(rawName.includes("District")) key = "District";
+                else if(rawName.includes("Domino")) key = "Domino";
+                else if(rawName.includes("Papa")) key = "Papa";
+                else if(rawName.includes("We")) key = "We";
+                else if(rawName.includes("Wiseguy")) key = "Wiseguy";
+
+                if(!key) return; // 没匹配到的杂鱼数据丢掉
+
+                // 统一时间
                 if(t.includes(" ")) t = t.split(" ")[1].substring(0, 5);
                 
                 if(!grps[t]) grps[t] = {};
-                grps[t][n] = p;
+                grps[t][key] = p;
+
                 if(p > max) max = p;
+                if(gap > maxGap) maxGap = gap;
             });
 
+            // 更新中文 KPI
             document.getElementById('v-max').innerText = max;
-            if(max > 50) {
-                const s = document.getElementById('v-stat');
-                s.innerText = "HIGH"; s.style.color = "var(--danger)";
+            document.getElementById('v-pts').innerText = Object.keys(grps).length;
+
+            // 异常检测逻辑
+            const gapEl = document.getElementById('v-gap');
+            const descEl = document.getElementById('v-gap-desc');
+            const statEl = document.getElementById('v-stat');
+
+            if (maxGap > 20) {
+                gapEl.innerText = "+" + maxGap + "%";
+                gapEl.style.color = "var(--danger)";
+                descEl.innerText = "⚠️ 异常激增";
+                descEl.style.color = "var(--danger)";
+                statEl.innerText = "高 (HIGH)";
+                statEl.style.color = "var(--danger)";
+            } else if (maxGap > 0) {
+                gapEl.innerText = "+" + maxGap + "%";
+                gapEl.style.color = "var(--warn)";
+                descEl.innerText = "📈 略高于平时";
+                descEl.style.color = "var(--warn)";
+            } else {
+                gapEl.innerText = "正常";
+                gapEl.style.color = "var(--success)";
+                descEl.innerText = "平稳";
             }
 
-            // 只显示最近 15 个点
+            // 画图 (只取最近15个点)
             const times = Object.keys(grps).sort().slice(-15);
-            document.getElementById('v-pts').innerText = times.length;
-
-            const dsets = Object.keys(CFG).map(k => {
+            const dsets = Object.keys(DICT).map(k => {
                 const pts = times.map(t => grps[t][k] ?? null);
-                // 只有全空才隐藏，只要有点就显示
                 if(pts.every(x => x === null)) return null;
                 return {
-                    label: CFG[k].n, // 这里取出来的就是中文名！
+                    label: DICT[k].n, // 这里强制使用字典里的中文名
                     data: pts,
-                    borderColor: CFG[k].c, backgroundColor: CFG[k].c,
-                    borderWidth: 2, tension: 0.3, pointRadius: 2, 
-                    spanGaps: true // 关键：允许断点续连
+                    borderColor: DICT[k].c, backgroundColor: DICT[k].c,
+                    borderWidth: 2, tension: 0.3, pointRadius: 2, spanGaps: true
                 };
             }).filter(x => x);
 
@@ -111,10 +158,11 @@
                     responsive: true, maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
                     plugins: { legend: false },
-                    scales: { x: { grid: {display:false}, ticks:{color:'#666', font:{size:10}} }, y: { display:false, beginAtZero:true } }
+                    scales: { x: { display:false }, y: { display:false, beginAtZero:true } }
                 }
             });
 
+            // 生成底部图例
             const lb = document.getElementById('Leg');
             dsets.forEach(d => {
                 lb.innerHTML += `<div class="pill" style="border-color:${d.borderColor}">${d.label}</div>`;
