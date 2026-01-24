@@ -1,3 +1,4 @@
 git+https://github.com/GrocerCheck/LivePopularTimes.git
 pandas
 requests
+tenacity
