@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>五角大楼情报 V14</title>
+    <title>五角大楼情报 V15</title>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
@@ -11,37 +11,65 @@
         :root { --bg: #000; --card: #151515; --text: #fff; --sub: #888; --danger: #ff453a; --warn: #ff9f0a; --success: #30d158; }
         body { background: var(--bg); color: var(--text); font-family: 'Inter', sans-serif; margin: 0; height: 100vh; display: flex; flex-direction: column; overflow: hidden; padding-top: env(safe-area-inset-top); padding-bottom: env(safe-area-inset-bottom); }
         
-        .header { padding: 12px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid #222; }
-        .brand { font-weight: 700; font-size: 16px; letter-spacing: 1px; }
-        .live { color: var(--success); font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 5px; }
+        /* 顶部标题栏 */
+        .header { padding: 12px 20px; display: flex; justify-content: space-between; border-bottom: 1px solid #222; flex-shrink: 0; }
+        .brand { font-weight: 700; font-size: 16px; letter-spacing: 0.5px; }
+        .live { color: var(--success); font-size: 12px; font-weight: bold; display: flex; align-items: center; gap: 6px; }
         .dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: p 1s infinite; } @keyframes p { 50% { opacity: 0.3; } }
         
-        /* 这里的卡片支持横向滑动，防止中文太长换行 */
-        .kpi-scroll { display: flex; gap: 10px; padding: 15px 20px; overflow-x: auto; flex-shrink: 0; }
-        .kpi-scroll::-webkit-scrollbar { display: none; }
-        .card { background: var(--card); border: 1px solid #333; border-radius: 10px; padding: 12px 16px; min-width: 130px; }
+        /* 🔥 核心修复：KPI 滑动容器 */
+        .kpi-scroll { 
+            display: flex; 
+            gap: 12px; 
+            padding: 16px 20px; 
+            overflow-x: auto; /* 允许横向滑动 */
+            -webkit-overflow-scrolling: touch; /* iOS丝滑滚动 */
+            flex-shrink: 0; /* 防止被挤压 */
+        }
+        .kpi-scroll::-webkit-scrollbar { display: none; } /* 隐藏滚动条 */
         
-        /* 强制全中文标签样式 */
-        .lbl { font-size: 11px; color: var(--sub); font-weight: bold; margin-bottom: 5px; letter-spacing: 0.5px; }
-        .val { font-size: 20px; font-weight: 700; }
-        .sub-val { font-size: 10px; margin-top: 4px; font-weight: 500; }
+        /* 🔥 核心修复：卡片定宽，拒绝变形 */
+        .card { 
+            background: var(--card); 
+            border: 1px solid #333; 
+            border-radius: 12px; 
+            padding: 12px 16px; 
+            min-width: 140px; /* 强制最小宽度，确保文字不换行 */
+            flex-shrink: 0;   /* 禁止被压缩 */
+            display: flex; flex-direction: column; justify-content: center;
+        }
+        
+        .lbl { font-size: 11px; color: var(--sub); font-weight: bold; margin-bottom: 6px; letter-spacing: 0.5px; white-space: nowrap; }
+        .val { font-size: 22px; font-weight: 700; line-height: 1.2; }
+        .sub-val { font-size: 11px; margin-top: 4px; font-weight: 500; opacity: 0.8; }
 
-        .chart-wrap { flex: 1; margin: 0 10px; background: #080808; border-radius: 15px; position: relative; }
-        .leg-bar { padding: 15px 20px; display: flex; gap: 8px; overflow-x: auto; border-top: 1px solid #222; flex-shrink: 0; }
-        .pill { background: #1a1a1a; padding: 6px 10px; border-radius: 6px; font-size: 11px; color: #ccc; white-space: nowrap; border-left: 3px solid transparent; display: flex; align-items: center; }
+        /* 图表区：自适应剩余空间 */
+        .chart-wrap { 
+            flex: 1; 
+            margin: 0 10px; 
+            background: #090909; 
+            border-radius: 16px; 
+            position: relative; 
+            min-height: 0; /* 防止溢出 */
+            border: 1px solid #222;
+        }
+        
+        /* 底部图例 */
+        .leg-bar { padding: 15px 20px; display: flex; gap: 10px; overflow-x: auto; border-top: 1px solid #222; flex-shrink: 0; align-items: center; }
+        .pill { background: #1a1a1a; padding: 6px 12px; border-radius: 8px; font-size: 11px; color: #ccc; white-space: nowrap; border-left: 3px solid transparent; display: flex; align-items: center; }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="brand">五角大楼情报局</div>
-        <div class="live"><div class="dot"></div>实时监控中</div>
+        <div class="live"><div class="dot"></div>实时监控</div>
     </div>
 
     <div class="kpi-scroll">
         <div class="card">
             <div class="lbl">⚡️ 异常波动 (Gap)</div>
             <div class="val" id="v-gap">--</div>
-            <div class="sub-val" id="v-gap-desc" style="color:#666">分析中...</div>
+            <div class="sub-val" id="v-gap-desc">分析中...</div>
         </div>
         
         <div class="card">
@@ -51,7 +79,7 @@
         
         <div class="card">
             <div class="lbl">🚨 威胁等级 (Level)</div>
-            <div class="val" id="v-stat" style="color:var(--success)">低 (正常)</div>
+            <div class="val" id="v-stat" style="color:var(--success)">正常</div>
         </div>
 
         <div class="card">
@@ -64,8 +92,7 @@
     <div class="leg-bar" id="Leg"></div>
 
     <script>
-        // ⚡️ 核心改动：不再依赖 Python 的名字，前端自己定义一套标准
-        // 只要 CSV 里的名字包含关键词，就强制显示成这里的中文
+        // ⚔️ 暴力匹配字典：只要名字里包含 Key，就强制显示成 Value
         const DICT = {
             "District": { c: "#ff453a", n: "特区披萨 (核心)" },
             "Domino":   { c: "#0a84ff", n: "达美乐 (外卖)" },
@@ -86,22 +113,21 @@
                 let t = r['Timestamp (ET)'];
                 let rawName = r.Name; 
                 let p = parseInt(r['Live Popularity']||0);
-                let gap = parseInt(r['Gap']||0); // 获取异常偏差
+                let gap = parseInt(r['Gap']||0);
 
                 if(!t || !rawName) return;
 
-                // 🔪 暴力匹配逻辑：只要包含关键词，就认领！
-                // 这样无论 Python 存的是 "Domino's" 还是 "Dominos"，都会变成中文
+                // 🔪 暴力清洗：不管原来的名字多乱，只要沾边就“抓”进来
                 let key = null;
                 if(rawName.includes("District")) key = "District";
                 else if(rawName.includes("Domino")) key = "Domino";
                 else if(rawName.includes("Papa")) key = "Papa";
-                else if(rawName.includes("We")) key = "We";
+                else if(rawName.includes("We")) key = "We"; // 包含 We 就行，不管是不是 We The Pizza
                 else if(rawName.includes("Wiseguy")) key = "Wiseguy";
 
-                if(!key) return; // 没匹配到的杂鱼数据丢掉
+                if(!key) return; // 没匹配到的杂鱼数据直接丢掉，防止污染图表
 
-                // 统一时间
+                // 统一时间格式
                 if(t.includes(" ")) t = t.split(" ")[1].substring(0, 5);
                 
                 if(!grps[t]) grps[t] = {};
@@ -111,7 +137,7 @@
                 if(gap > maxGap) maxGap = gap;
             });
 
-            // 更新中文 KPI
+            // 更新 KPI
             document.getElementById('v-max').innerText = max;
             document.getElementById('v-pts').innerText = Object.keys(grps).length;
 
@@ -130,21 +156,23 @@
             } else if (maxGap > 0) {
                 gapEl.innerText = "+" + maxGap + "%";
                 gapEl.style.color = "var(--warn)";
-                descEl.innerText = "📈 略高于平时";
+                descEl.innerText = "📈 略有波动";
                 descEl.style.color = "var(--warn)";
             } else {
-                gapEl.innerText = "正常";
+                gapEl.innerText = "稳定";
                 gapEl.style.color = "var(--success)";
-                descEl.innerText = "平稳";
+                descEl.innerText = "与平时持平";
+                descEl.style.color = "#666";
             }
 
-            // 画图 (只取最近15个点)
+            // 画图：只取最近15个点
             const times = Object.keys(grps).sort().slice(-15);
             const dsets = Object.keys(DICT).map(k => {
                 const pts = times.map(t => grps[t][k] ?? null);
+                // 只要该店在最近15次里出现过1次，就画出来，别隐藏
                 if(pts.every(x => x === null)) return null;
                 return {
-                    label: DICT[k].n, // 这里强制使用字典里的中文名
+                    label: DICT[k].n, // 强制使用中文名
                     data: pts,
                     borderColor: DICT[k].c, backgroundColor: DICT[k].c,
                     borderWidth: 2, tension: 0.3, pointRadius: 2, spanGaps: true
@@ -157,8 +185,11 @@
                 options: {
                     responsive: true, maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
-                    plugins: { legend: false },
-                    scales: { x: { display:false }, y: { display:false, beginAtZero:true } }
+                    plugins: { legend: false }, // 隐藏默认图例
+                    scales: { 
+                        x: { display:false }, 
+                        y: { display:false, beginAtZero:true } // 隐藏Y轴数字，更干净
+                    }
                 }
             });
 
