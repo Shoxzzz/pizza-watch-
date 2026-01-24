@@ -1,43 +1,58 @@
-name: Pentagon Pizza Watch
+name: Pentagon Pizza Watch V5 (Hourly)
 
+# 触发机制
 on:
   schedule:
-    # 每4小时运行一次
-    - cron: '0 */4 * * *'
+    # 🕒 改为：每小时的第 0 分钟运行 (整点侦察)
+    # 对应北京时间可能是 8:00, 9:00, 10:00... (会有十几分钟延迟)
+    - cron: '0 * * * *'
+  # 手动核按钮 (保留)
   workflow_dispatch:
 
+# 🛡️ 战术并发控制
+concurrency:
+  group: pentagon-intel-v5
+  cancel-in-progress: true
+
+# 🔒 写权限 (必须有)
 permissions:
   contents: write
-  issues: write
 
 jobs:
-  spy-job:
+  black-ops:
     runs-on: ubuntu-latest
-    
+    timeout-minutes: 20
+
     steps:
-    - name: Checkout code
+    - name: 📥 拉取最新情报 (Checkout)
       uses: actions/checkout@v4
 
-    - name: Set up Python
-      uses: actions/setup-python@v4
+    - name: 🐍 部署 Python 3.10 环境
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.9'
+        python-version: '3.10'
+        cache: 'pip' # ⚡️ 开启缓存加速
 
-    - name: Install dependencies
+    - name: 🛠️ 装填战术装备 (Install Deps)
       run: |
+        python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: Run Pizza Monitor
+    - name: 🕵️‍♂️ 执行 V5 侦察任务 (Execute)
       env:
-        # 👇 这一步就是把您刚才存的秘密传给代码
-        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-      run: python monitor.py
+      # -u 实时日志
+      run: python -u monitor.py
 
-    - name: Commit and Push Data
+    - name: 💾 同步情报数据库 (Sync Data)
       run: |
-        git config --global user.name "PizzaSpyBot"
-        git config --global user.email "bot@example.com"
-        git add pizza_data.csv
-        git commit -m "Update Pizza Intelligence" || echo "No changes to commit"
+        git config --global user.name "Pentagon V5 Bot"
+        git config --global user.email "intel@pentagon.watch"
+        
+        # ⚠️ 必须同时追踪数据和归档
+        git add pizza_data.csv pizza_archive.csv || true
+        
+        timestamp=$(date -u)
+        git commit -m "HOURLY INTEL UPDATE: $timestamp" || echo "⚠️ 本次无新情报"
+        
         git push
