@@ -1,58 +1,57 @@
-name: Pentagon Pizza Watch V5 (Hourly)
+name: Pentagon Pizza V10 (Hourly)
 
-# 触发机制
 on:
   schedule:
-    # 🕒 改为：每小时的第 0 分钟运行 (整点侦察)
-    # 对应北京时间可能是 8:00, 9:00, 10:00... (会有十几分钟延迟)
+    # 🕒 核心设定：每小时的第 0 分钟运行 (整点抓取)
+    # 例如：8:00, 9:00, 10:00... (会有 GitHub 延迟，正常)
     - cron: '0 * * * *'
-  # 手动核按钮 (保留)
+  
+  # 手动触发按钮 (测试用)
   workflow_dispatch:
 
-# 🛡️ 战术并发控制
 concurrency:
-  group: pentagon-intel-v5
+  group: pentagon-v10
   cancel-in-progress: true
 
-# 🔒 写权限 (必须有)
 permissions:
   contents: write
 
 jobs:
-  black-ops:
+  spy-job:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 20 # 给足时间，防止网络卡顿
 
     steps:
-    - name: 📥 拉取最新情报 (Checkout)
+    - name: 📥 拉取代码
       uses: actions/checkout@v4
 
-    - name: 🐍 部署 Python 3.10 环境
+    - name: 🐍 设置 Python 3.10
       uses: actions/setup-python@v5
       with:
-        python-version: '3.10'
-        cache: 'pip' # ⚡️ 开启缓存加速
+        python-version: '3.10' 
+        cache: 'pip' # 开启缓存加速
 
-    - name: 🛠️ 装填战术装备 (Install Deps)
+    - name: 📦 安装依赖
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: 🕵️‍♂️ 执行 V5 侦察任务 (Execute)
+    - name: 🕵️‍♂️ 执行 V10 抓取
       env:
+        # 如果您配置了 Discord，这里会用到
         DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
-      # -u 实时日志
       run: python -u monitor.py
 
-    - name: 💾 同步情报数据库 (Sync Data)
+    - name: 💾 保存数据
       run: |
-        git config --global user.name "Pentagon V5 Bot"
-        git config --global user.email "intel@pentagon.watch"
+        git config --global user.name "Pentagon Bot V10"
+        git config --global user.email "bot@pentagon.ops"
         
-        # ⚠️ 必须同时追踪数据和归档
-        git add pizza_data.csv pizza_archive.csv || true
+        # 强制添加数据文件
+        git add pizza_data.csv || true
         
+        # 提交 (带上时间戳)
         timestamp=$(date -u)
-        git commit -m "HOURLY INTEL UPDATE: $timestamp" || echo "⚠️ 本次无新情报"
+        git commit -m "INTEL UPDATE: $timestamp" || echo "⚠️ 无新数据"
         
         git push
