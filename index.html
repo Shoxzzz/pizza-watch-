@@ -109,15 +109,14 @@
         
         .man-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         
-        /* 演示条 */
+        /* 基础图例 */
         .demo-box { display: flex; align-items: center; gap: 8px; font-size: 11px; color: #ccc; margin-bottom: 6px; }
         .demo-bar { width: 6px; height: 14px; background: #333; border-radius: 2px; }
         .demo-bar.red { background: var(--danger); box-shadow: 0 0 5px rgba(255, 59, 48, 0.4); }
         .demo-bar.gray { background: #333; }
         .demo-bar.white { background: #fff; }
-        .demo-arrow { font-weight: bold; font-size: 12px; }
 
-        /* 标签档案 */
+        /* 资产档案 */
         .tag-row { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 12px; }
         .tag-badge { 
             width: 45px; height: 20px; border-radius: 4px; flex-shrink: 0; 
@@ -142,7 +141,6 @@
         .c-red { color: var(--danger); }
         .c-green { color: var(--safe); }
         .c-gray { color: #888; }
-        
         .loading { text-align: center; margin-top: 50px; color: #444; font-size: 12px; }
     </style>
 </head>
@@ -167,10 +165,10 @@
                     <div>
                         <div style="font-size:10px; color:#888; font-weight:bold; margin-bottom:5px;">颜色含义</div>
                         <div class="demo-box">
-                            <div class="demo-bar red"></div> <span>热度 > 50 (危险)</span>
+                            <div class="demo-bar red"></div> <span>热度 > 50 (高危)</span>
                         </div>
                         <div class="demo-box">
-                            <div class="demo-bar gray"></div> <span>热度 < 50 (安全)</span>
+                            <div class="demo-bar gray"></div> <span>热度 < 50 (常态)</span>
                         </div>
                     </div>
                     <div>
@@ -181,7 +179,7 @@
                             <div class="demo-bar red" style="height:90%"></div>
                             <div class="demo-bar white" style="height:60%"></div>
                         </div>
-                        <div style="font-size:9px; color:#555;">◀ 过去20h &nbsp;&nbsp;&nbsp; 现在 ▶</div>
+                        <div style="font-size:9px; color:#555;">◀ 过去 &nbsp;&nbsp;&nbsp; 现在 (白) ▶</div>
                     </div>
                 </div>
             </div>
@@ -193,7 +191,7 @@
                     <div class="tag-badge bg-red">CORE</div>
                     <div class="tag-info">
                         <div class="tag-title">特区披萨 (District Pizza)</div>
-                        <div class="tag-desc"><strong>核心哨所</strong>。距离五角大楼最近。它的波动直接反映大楼内人员流动。</div>
+                        <div class="tag-desc"><strong>核心哨所</strong>。距离最近，最敏感的内部风向标。</div>
                     </div>
                 </div>
 
@@ -201,7 +199,7 @@
                     <div class="tag-badge bg-blue">SUPPLY</div>
                     <div class="tag-info">
                         <div class="tag-title">达美乐 / 棒约翰 (Delivery)</div>
-                        <div class="tag-desc"><strong>补给线</strong>。主营外卖。数值激增 = 内部人员被禁足/加班，无法外出。</div>
+                        <div class="tag-desc"><strong>补给线</strong>。主营外卖。激增 = 内部人员禁足/加班。</div>
                     </div>
                 </div>
 
@@ -209,7 +207,15 @@
                     <div class="tag-badge bg-yellow">CROWD</div>
                     <div class="tag-info">
                         <div class="tag-title">Wiseguy (Slices)</div>
-                        <div class="tag-desc"><strong>人员聚集</strong>。商圈散客店。数值高 = 周边有大型活动或媒体聚集。</div>
+                        <div class="tag-desc"><strong>人员聚集</strong>。商圈散客。激增 = 公共/媒体事件。</div>
+                    </div>
+                </div>
+
+                <div class="tag-row">
+                    <div class="tag-badge bg-green">FLANK</div>
+                    <div class="tag-info">
+                        <div class="tag-title">We披萨 (Crystal City)</div>
+                        <div class="tag-desc"><strong>侧翼观察</strong>。位于水晶城。用于“去噪”和对比验证。</div>
                     </div>
                 </div>
             </div>
@@ -217,6 +223,7 @@
             <div>
                 <div class="man-section-title"><span>🧠</span> 联合情报矩阵 (INTEL MATRIX)</div>
                 <div class="matrix-box">
+                    
                     <div class="scenario-row">
                         <div class="s-condition">
                             <span class="c-red">SUPPLY 高</span> 
@@ -224,25 +231,51 @@
                             <span class="c-gray">CORE 低</span>
                         </div>
                         <div class="s-result" style="color:var(--danger)">
-                            🚨 内部封锁<br><span style="font-size:9px; color:#666; font-weight:normal">人出不来，只能叫外卖</span>
+                            🚨 内部封锁<br><span style="font-size:9px; color:#666; font-weight:normal">只进不出 (点外卖)</span>
                         </div>
                     </div>
                     <div style="border-top:1px solid #222;"></div>
+
                     <div class="scenario-row">
                         <div class="s-condition">
                             <span class="c-red">CORE 高</span> 
                             <span class="s-plus">+</span>
-                            <span class="c-red">CROWD 高</span>
+                            <span class="c-gray">FLANK 低</span>
                         </div>
-                        <div class="s-result" style="color:var(--warn)">
-                            📢 公共事件<br><span style="font-size:9px; color:#666; font-weight:normal">周边区域整体拥堵</span>
+                        <div class="s-result" style="color:var(--danger)">
+                            🎯 确认异常<br><span style="font-size:9px; color:#666; font-weight:normal">仅五角大楼活跃 (非全区)</span>
                         </div>
                     </div>
+                    <div style="border-top:1px solid #222;"></div>
+
+                    <div class="scenario-row">
+                        <div class="s-condition">
+                            <span class="c-red">CORE 高</span> 
+                            <span class="s-plus">+</span>
+                            <span class="c-green">FLANK 高</span>
+                        </div>
+                        <div class="s-result" style="color:#fff">
+                            🎉 虚假警报<br><span style="font-size:9px; color:#666; font-weight:normal">全区都在过周末 (无战术价值)</span>
+                        </div>
+                    </div>
+                    <div style="border-top:1px solid #222;"></div>
+
+                    <div class="scenario-row">
+                        <div class="s-condition">
+                            <span class="c-red">CORE 高</span> 
+                            <span class="s-plus">+</span>
+                            <span class="c-gray">CROWD 高</span>
+                        </div>
+                        <div class="s-result" style="color:var(--warn)">
+                            📢 公共事件<br><span style="font-size:9px; color:#666; font-weight:normal">媒体/人群聚集</span>
+                        </div>
+                    </div>
+
                 </div>
             </div>
             
             <div style="font-size:10px; color:#444; text-align:center;">
-                PENTAGON OPS V28 // FULL MANUAL
+                PENTAGON OPS V30 // PERFECTED
             </div>
         </div>
     </div>
