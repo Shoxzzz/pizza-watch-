@@ -3,130 +3,95 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>PENTAGON OPS</title>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600&display=swap" rel="stylesheet">
+    <title>PENTAGON OPS V8</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
-        /* 🎨 全局变量：黑金配色 */
         :root {
-            --bg-color: #000000;
-            --card-bg: rgba(28, 28, 30, 0.6);
-            --text-main: #ffffff;
-            --text-sub: #8e8e93;
-            --accent: #0a84ff;
-            --danger: #ff453a;
-            --success: #30d158;
-            --blur: 20px;
+            --bg: #050505;
+            --card: #151515;
+            --text: #eaeaea;
+            --accent: #2563eb; /* 科技蓝 */
+            --danger: #ef4444;
+            --success: #22c55e;
         }
-
         body {
-            background-color: var(--bg-color);
-            /* 极光背景动画 */
-            background-image: 
-                radial-gradient(circle at 0% 0%, #1a1a2e 0%, transparent 50%),
-                radial-gradient(circle at 100% 100%, #150015 0%, transparent 50%);
-            color: var(--text-main);
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background-color: var(--bg);
+            color: var(--text);
+            font-family: 'Inter', sans-serif;
             margin: 0; padding: 0;
             height: 100vh;
             display: flex; flex-direction: column;
-            overflow: hidden;
+            overflow: hidden; /* 禁止页面滚动 */
         }
 
-        /* 📱 顶部导航栏 */
-        .navbar {
-            padding: 20px 24px;
+        /* 顶部栏 */
+        .header {
+            padding: 15px 20px;
+            background: var(--card);
+            border-bottom: 1px solid #333;
             display: flex; justify-content: space-between; align-items: center;
-            backdrop-filter: blur(var(--blur));
-            -webkit-backdrop-filter: blur(var(--blur));
-            border-bottom: 1px solid rgba(255,255,255,0.05);
-            z-index: 10;
         }
-        .brand {
-            font-size: 18px; font-weight: 600; letter-spacing: -0.5px;
-            background: linear-gradient(90deg, #fff, #888);
-            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-        }
-        .live-tag {
-            font-size: 11px; font-weight: 600; color: var(--success);
-            background: rgba(48, 209, 88, 0.15);
-            padding: 4px 10px; border-radius: 20px;
+        .title { font-weight: 600; font-size: 14px; letter-spacing: 1px; color: #fff; }
+        .live-status { 
+            font-size: 10px; color: var(--success); 
             display: flex; align-items: center; gap: 6px;
+            background: rgba(34, 197, 94, 0.1); padding: 4px 8px; border-radius: 4px;
         }
-        .pulse { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: pulse 2s infinite; }
-        @keyframes pulse { 0% { opacity: 1; transform: scale(1); } 50% { opacity: 0.5; transform: scale(1.2); } 100% { opacity: 1; transform: scale(1); } }
+        .dot { width: 6px; height: 6px; background: var(--success); border-radius: 50%; animation: pulse 1.5s infinite; }
+        @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.4; } 100% { opacity: 1; } }
 
-        /* 📊 KPI 概览卡片 */
-        .kpi-row {
-            display: flex; gap: 12px; padding: 16px 24px;
-            overflow-x: auto; /* 允许横向滑动 */
-            scrollbar-width: none; /* 隐藏滚动条 */
+        /* KPI 数据板 - 放在图表上方 */
+        .kpi-board {
+            display: grid; grid-template-columns: 1fr 1fr; gap: 15px;
+            padding: 20px 20px 10px 20px;
         }
-        .kpi-card {
-            background: var(--card-bg);
-            border: 1px solid rgba(255,255,255,0.08);
-            border-radius: 16px;
-            padding: 12px 16px;
-            min-width: 100px;
-            flex: 1;
+        .kpi-item {
+            background: var(--card); border: 1px solid #333; border-radius: 8px;
+            padding: 12px;
         }
-        .kpi-label { font-size: 11px; color: var(--text-sub); margin-bottom: 4px; text-transform: uppercase; letter-spacing: 0.5px; }
-        .kpi-value { font-size: 20px; font-weight: 600; letter-spacing: -0.5px; }
-        
-        /* 📈 图表核心区 */
+        .kpi-label { font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 5px; }
+        .kpi-val { font-size: 20px; font-weight: 600; color: #fff; }
+
+        /* 图表容器 - 自动撑满剩余空间 */
         .chart-wrapper {
-            flex: 1;
-            position: relative;
-            margin: 0 16px 16px 16px;
-            background: var(--card-bg);
-            border-radius: 24px;
-            border: 1px solid rgba(255,255,255,0.05);
-            padding: 16px;
-            box-shadow: 0 20px 40px -10px rgba(0,0,0,0.5);
+            flex: 1; 
+            position: relative; 
+            margin: 10px 20px;
+            min-height: 0; /* 关键：防止溢出 */
         }
 
-        /* 🏷️ 底部滑动图例 */
-        .legend-scroll {
-            padding: 0 24px 30px 24px;
+        /* 底部极简图例 */
+        .legend {
+            padding: 10px 20px 30px 20px;
             display: flex; gap: 10px; overflow-x: auto;
-            flex-shrink: 0;
+            border-top: 1px solid #222;
         }
-        .legend-pill {
-            background: rgba(255,255,255,0.08);
-            border-radius: 20px;
-            padding: 6px 14px;
-            font-size: 12px;
-            color: #ccc;
-            white-space: nowrap;
+        .pill {
+            background: #222; padding: 6px 10px; border-radius: 4px;
+            font-size: 11px; color: #ccc; white-space: nowrap;
             display: flex; align-items: center; gap: 6px;
-            border: 1px solid transparent;
-            transition: all 0.2s;
+            border-left: 3px solid transparent; /* 色条在左边 */
         }
-        .legend-pill.active { background: rgba(255,255,255,0.15); border-color: rgba(255,255,255,0.2); color: #fff; }
-        .dot { width: 8px; height: 8px; border-radius: 50%; }
 
     </style>
 </head>
 <body>
 
-    <div class="navbar">
-        <div class="brand">PENTAGON OPS</div>
-        <div class="live-tag"><div class="pulse"></div> LIVE</div>
+    <div class="header">
+        <div class="title">PENTAGON V8</div>
+        <div class="live-status"><div class="dot"></div>MONITORING</div>
     </div>
 
-    <div class="kpi-row">
-        <div class="kpi-card">
-            <div class="kpi-label">Max Peak</div>
-            <div class="kpi-value" id="max-val">--</div>
+    <div class="kpi-board">
+        <div class="kpi-item">
+            <div class="kpi-label">Max Spike (最高热度)</div>
+            <div class="kpi-val" id="max-val">--</div>
         </div>
-        <div class="kpi-card">
-            <div class="kpi-label">Alert Level</div>
-            <div class="kpi-value" id="alert-lvl" style="color:var(--success)">LOW</div>
-        </div>
-        <div class="kpi-card">
-            <div class="kpi-label">Active Spots</div>
-            <div class="kpi-value">5</div>
+        <div class="kpi-item">
+            <div class="kpi-label">Threat Level (警戒)</div>
+            <div class="kpi-val" id="level-val" style="color:var(--success)">LOW</div>
         </div>
     </div>
 
@@ -134,146 +99,111 @@
         <canvas id="mainChart"></canvas>
     </div>
 
-    <div class="legend-scroll" id="legend-container">
-        </div>
+    <div class="legend" id="legend-box"></div>
 
     <script>
-        // 🎨 苹果级配色方案
-        const colors = {
-            "District Pizza Palace": "#ff3b30", // Apple Red
-            "Domino's Pizza": "#0a84ff",       // Apple Blue
-            "Papa John's Pizza": "#bf5af2",    // Apple Purple
-            "Wiseguy Pizza": "#ffd60a",        // Apple Yellow
-            "We": "#32d74b",                   // Apple Green
-            "We, The Pizza": "#32d74b"
-        };
+        // 🔥 V8 核心逻辑：只显示最近的 15 个点
+        // 哪怕你有 10000 条数据，也只裁切最后 15 条给图表
+        // 这就是解决“乱成一团”的唯一解法
+        const SHOW_LIMIT = 15;
 
-        const shortNames = {
-            "District Pizza Palace": "特区披萨",
-            "Domino's Pizza": "达美乐",
-            "Papa John's Pizza": "棒约翰",
-            "Wiseguy Pizza": "Wiseguy",
-            "We": "We Pizza",
-            "We, The Pizza": "We Pizza"
+        const colors = {
+            "District Pizza Palace": "#ef4444", // 红
+            "Domino's Pizza": "#3b82f6",       // 蓝
+            "Papa John's Pizza": "#a855f7",    // 紫
+            "Wiseguy Pizza": "#eab308",        // 黄
+            "We": "#22c55e",                   // 绿
+            "We, The Pizza": "#22c55e"
+        };
+        const names = {
+            "District Pizza Palace": "特区披萨", "Domino's Pizza": "达美乐",
+            "Papa John's Pizza": "棒约翰", "Wiseguy Pizza": "Wiseguy",
+            "We": "We Pizza", "We, The Pizza": "We Pizza"
         };
 
         Papa.parse("pizza_data.csv", {
             download: true, header: true, skipEmptyLines: true,
-            complete: function(results) {
-                renderDashboard(results.data);
-            }
+            complete: res => render(res.data)
         });
 
-        function renderDashboard(data) {
-            const series = {};
-            const labelsSet = new Set();
-            let globalMax = 0;
+        function render(data) {
+            // 1. 数据整理
+            const group = {};
+            let maxScore = 0;
 
-            // 1. 数据清洗
-            data.forEach(row => {
-                const rawTime = row['Timestamp (ET)'];
-                const name = row.Name;
-                const pop = parseInt(row['Live Popularity']);
-                
-                if (!rawTime || !name) return;
-                
-                // 智能时间截取 (只取 HH:mm)
-                const timeLabel = rawTime.includes(" ") ? rawTime.split(" ")[1].substring(0, 5) : rawTime;
-                
-                labelsSet.add(timeLabel);
-                if (!series[name]) series[name] = [];
-                series[name].push({ x: timeLabel, y: isNaN(pop) ? 0 : pop });
+            data.forEach(d => {
+                const t = d['Timestamp (ET)'];
+                const n = d.Name;
+                const p = parseInt(d['Live Popularity'] || 0);
+                if(!t || !n) return;
 
-                // 更新 KPI
-                if(pop > globalMax) globalMax = pop;
+                // 简化时间：只取 10:30 这种格式
+                const timeStr = t.includes(" ") ? t.split(" ")[1].substring(0, 5) : t;
+                
+                if(!group[timeStr]) group[timeStr] = {};
+                group[timeStr][n] = p;
+
+                if(p > maxScore) maxScore = p;
             });
 
-            // 2. 更新 KPI 面板
-            document.getElementById('max-val').innerText = globalMax;
-            if(globalMax > 50) {
-                const el = document.getElementById('alert-lvl');
-                el.innerText = "HIGH";
-                el.style.color = "var(--danger)";
+            // 2. 更新 KPI
+            document.getElementById('max-val').innerText = maxScore;
+            if(maxScore > 50) {
+                const lv = document.getElementById('level-val');
+                lv.innerText = "HIGH";
+                lv.style.color = "var(--danger)";
             }
 
-            const labels = Array.from(labelsSet).sort();
+            // 3. 🔪 核心切割：只取最后 15 个时间段
+            const allTimes = Object.keys(group).sort();
+            const slicedTimes = allTimes.slice(-SHOW_LIMIT); // 负数代表从后往前取
 
-            // 3. 构建发光曲线
-            const datasets = Object.keys(series).map(name => {
-                const c = colors[name] || '#999';
-                const alignedData = labels.map(lbl => {
-                    const pt = series[name].find(p => p.x === lbl);
-                    return pt ? pt.y : null;
+            // 4. 构建数据集
+            const datasets = Object.keys(colors).map(shop => {
+                const points = slicedTimes.map(time => {
+                    return group[time][shop] !== undefined ? group[time][shop] : null;
                 });
+                
+                // 全空的数据不显示
+                if(points.every(x => x === null)) return null;
 
                 return {
-                    label: name,
-                    data: alignedData,
-                    borderColor: c,
-                    backgroundColor: c, // 用于 Hover 时的颜色
+                    label: names[shop] || shop,
+                    data: points,
+                    borderColor: colors[shop],
+                    backgroundColor: colors[shop],
                     borderWidth: 2,
-                    tension: 0.4, // 丝滑曲线
-                    pointRadius: 0, // 平时隐藏点
-                    pointHoverRadius: 6,
+                    pointRadius: 3, // 点的大小
                     pointBackgroundColor: '#000',
-                    pointBorderColor: c,
-                    pointBorderWidth: 2,
-                    spanGaps: true,
-                    // ✨ 关键：阴影制造发光感
-                    shadowColor: c,
-                    shadowBlur: 10
+                    tension: 0.3, // 曲线平滑度
+                    spanGaps: true // 断点续连
                 };
-            });
+            }).filter(d => d);
 
-            // 4. 初始化图表
-            const ctx = document.getElementById('mainChart').getContext('2d');
-            new Chart(ctx, {
+            // 5. 绘图
+            new Chart(document.getElementById('mainChart'), {
                 type: 'line',
-                data: { labels, datasets },
+                data: { labels: slicedTimes, datasets },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
                     interaction: { mode: 'index', intersect: false },
-                    plugins: {
-                        legend: { display: false }, // 隐藏默认图例
-                        tooltip: {
-                            backgroundColor: 'rgba(28, 28, 30, 0.9)',
-                            titleColor: '#fff',
-                            bodyColor: '#ccc',
-                            titleFont: { family: 'Inter', size: 13 },
-                            bodyFont: { family: 'Inter', size: 12 },
-                            padding: 12,
-                            cornerRadius: 8,
-                            displayColors: true
-                        }
-                    },
+                    plugins: { legend: false }, // 隐藏自带图例
                     scales: {
-                        x: {
-                            grid: { display: false },
-                            ticks: { color: '#666', font: {family:'Inter', size:10}, maxTicksLimit: 5, maxRotation: 0 }
-                        },
-                        y: {
-                            grid: { color: 'rgba(255,255,255,0.05)', borderDash: [4, 4] },
-                            ticks: { display: false }, // 隐藏Y轴数字，更简洁
-                            beginAtZero: true,
-                            suggestedMax: 100
+                        x: { grid: { display: false }, ticks: { color: '#666', font: {size: 10} } },
+                        y: { 
+                            grid: { color: '#222', borderDash: [5,5] }, 
+                            ticks: { display: false }, // 隐藏Y轴数字
+                            beginAtZero: true, suggestedMax: 100 
                         }
                     }
                 }
             });
 
-            // 5. 生成底部胶囊图例
-            const legCont = document.getElementById('legend-container');
-            Object.keys(series).forEach(name => {
-                const c = colors[name] || '#999';
-                const n = shortNames[name] || name.split(" ")[0];
-                
-                legCont.innerHTML += `
-                    <div class="legend-pill">
-                        <div class="dot" style="background:${c}; box-shadow: 0 0 6px ${c}"></div>
-                        ${n}
-                    </div>
-                `;
+            // 6. 生成底部图例
+            const leg = document.getElementById('legend-box');
+            datasets.forEach(d => {
+                leg.innerHTML += `<div class="pill" style="border-left-color:${d.borderColor}">${d.label}</div>`;
             });
         }
     </script>
