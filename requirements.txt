@@ -1,4 +1,5 @@
-git+https://github.com/GrocerCheck/LivePopularTimes.git
-pandas
 requests
+pytz
+livepopulartimes
 tenacity
+feedparser
