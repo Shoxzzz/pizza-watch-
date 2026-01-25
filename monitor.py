@@ -50,7 +50,7 @@ def run_spy():
     
     for code_name, address in TARGETS.items():
         try:
-            time.sleep(random.randint(1, 2)) 
+            time.sleep(random.randint(2, 5)) 
             data = fetch_data(address)
             
             # 1. 获取实时热度
@@ -60,28 +60,29 @@ def run_spy():
             usual_pop = get_usual_popularity(data, batch_time)
             
             # 3. 计算偏差 (异常指数)
-            # 正数表示比平时多，负数表示比平时少
             gap = live_pop - usual_pop
             
             rating = data.get('rating', 0)
             
             print(f"📍 {code_name} | Live: {live_pop} | Usual: {usual_pop} | Gap: {gap}")
             
-            # 💾 存入 CSV: 新增了两列 (Usual, Gap)
+            # 💾 存入 CSV
             current_batch.append([batch_time_str, code_name, live_pop, rating, usual_pop, gap])
 
         except Exception as e:
             print(f"❌ Error {code_name}: {e}")
+            # 出错补零，保持数据连续
+            current_batch.append([batch_time_str, code_name, 0, 0, 0, 0])
             continue
 
-    if current_batch:
-        file_exists = os.path.isfile(LIVE_FILE)
-        with open(LIVE_FILE, 'a', newline='', encoding='utf-8-sig') as f:
-            writer = csv.writer(f)
-            # 如果是新文件，写入新表头
-            if not file_exists: 
-                writer.writerow(['Timestamp (ET)', 'Name', 'Live Popularity', 'Rating', 'Usual Popularity', 'Gap'])
-            writer.writerows(current_batch)
+    # 追加写入
+    file_exists = os.path.isfile(LIVE_FILE)
+    with open(LIVE_FILE, 'a', newline='', encoding='utf-8-sig') as f:
+        writer = csv.writer(f)
+        if not file_exists: 
+            writer.writerow(['Timestamp (ET)', 'Name', 'Live Popularity', 'Rating', 'Usual Popularity', 'Gap'])
+        writer.writerows(current_batch)
+    print("✅ Pizza Data Saved.")
 
 if __name__ == "__main__":
     run_spy()
