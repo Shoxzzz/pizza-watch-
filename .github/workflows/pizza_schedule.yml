@@ -1,9 +1,9 @@
-name: Pentagon Intel Suite (V32)
+name: Pentagon Intel (Dual Agents)
 
 on:
   schedule:
-    - cron: '0 * * * *' # 每小时整点
-  workflow_dispatch:
+    - cron: '0 * * * *' # 每小时运行
+  workflow_dispatch: # 手动运行按钮
 
 concurrency:
   group: pentagon-intel
@@ -13,7 +13,7 @@ permissions:
   contents: write
 
 jobs:
-  intel-job:
+  spy-job:
     runs-on: ubuntu-latest
     timeout-minutes: 15
 
@@ -31,20 +31,24 @@ jobs:
       run: |
         pip install -r requirements.txt
 
-    - name: 🍕 抓取披萨数据
+    - name: 🍕 特工1：抓取披萨数据
       run: python -u monitor.py
-      
-    - name: 📰 抓取新闻数据
-      run: python -u news.py
+      continue-on-error: true # 披萨抓失败了不要停，继续抓新闻
 
-    - name: 💾 保存所有情报
+    - name: 📰 特工2：抓取新闻电讯
+      run: python -u news.py
+      continue-on-error: true
+
+    - name: 💾 上传情报
       run: |
-        git config --global user.name "Pentagon Bot V32"
+        git config --global user.name "Pentagon Bot"
         git config --global user.email "bot@pentagon.ops"
         
-        # 同时提交两个 CSV
+        # 强制添加两个文件
         git add pizza_data.csv pentagon_news.csv || true
         
-        git commit -m "FULL INTEL UPDATE: $(date -u)" || echo "⚠️ 无新情报"
+        # 提交
+        timestamp=$(date -u)
+        git commit -m "INTEL UPDATE: $timestamp" || echo "⚠️ 无新数据"
         
         git push
