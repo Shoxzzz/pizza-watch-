@@ -1,57 +1,50 @@
-name: Pentagon Pizza V10 (Hourly)
+name: Pentagon Intel Suite (V32)
 
 on:
   schedule:
-    # 🕒 核心设定：每小时的第 0 分钟运行 (整点抓取)
-    # 例如：8:00, 9:00, 10:00... (会有 GitHub 延迟，正常)
-    - cron: '0 * * * *'
-  
-  # 手动触发按钮 (测试用)
+    - cron: '0 * * * *' # 每小时整点
   workflow_dispatch:
 
 concurrency:
-  group: pentagon-v10
+  group: pentagon-intel
   cancel-in-progress: true
 
 permissions:
   contents: write
 
 jobs:
-  spy-job:
+  intel-job:
     runs-on: ubuntu-latest
-    timeout-minutes: 20 # 给足时间，防止网络卡顿
+    timeout-minutes: 15
 
     steps:
     - name: 📥 拉取代码
       uses: actions/checkout@v4
 
-    - name: 🐍 设置 Python 3.10
+    - name: 🐍 设置 Python
       uses: actions/setup-python@v5
       with:
         python-version: '3.10' 
-        cache: 'pip' # 开启缓存加速
+        cache: 'pip'
 
     - name: 📦 安装依赖
       run: |
-        python -m pip install --upgrade pip
         pip install -r requirements.txt
 
-    - name: 🕵️‍♂️ 执行 V10 抓取
-      env:
-        # 如果您配置了 Discord，这里会用到
-        DISCORD_WEBHOOK: ${{ secrets.DISCORD_WEBHOOK }}
+    - name: 🍕 抓取披萨数据
       run: python -u monitor.py
+      
+    - name: 📰 抓取新闻数据
+      run: python -u news.py
 
-    - name: 💾 保存数据
+    - name: 💾 保存所有情报
       run: |
-        git config --global user.name "Pentagon Bot V10"
+        git config --global user.name "Pentagon Bot V32"
         git config --global user.email "bot@pentagon.ops"
         
-        # 强制添加数据文件
-        git add pizza_data.csv || true
+        # 同时提交两个 CSV
+        git add pizza_data.csv pentagon_news.csv || true
         
-        # 提交 (带上时间戳)
-        timestamp=$(date -u)
-        git commit -m "INTEL UPDATE: $timestamp" || echo "⚠️ 无新数据"
+        git commit -m "FULL INTEL UPDATE: $(date -u)" || echo "⚠️ 无新情报"
         
         git push
