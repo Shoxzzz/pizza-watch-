@@ -8,213 +8,152 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
     <style>
         :root { 
-            --bg: #050505; --card-bg: #141414; --text: #e0e0e0; --sub: #888;
+            --bg: #050505; --card-bg: #111; --text: #e0e0e0; --sub: #666;
             --danger: #ff453a; --warn: #ffd60a; --safe: #32d74b; --blue: #0a84ff;
-            --card-border: 1px solid #262626;
+            --card-border: 1px solid #222;
         }
         body { background: var(--bg); color: var(--text); font-family: 'Noto Sans SC', sans-serif; margin: 0; padding: 0; padding-bottom: 100px; line-height: 1.5; }
         
-        /* 顶部导航 */
-        .header { padding: 18px 24px; background: rgba(10,10,10,0.8); position: sticky; top: 0; z-index: 99; border-bottom: var(--card-border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(25px); }
-        .title { font-weight: 900; letter-spacing: 1.5px; font-size: 18px; color: #fff; }
-        .live-badge { font-size: 12px; font-weight: 700; color: var(--safe); background: rgba(50,215,75,0.15); padding: 6px 10px; border-radius: 6px; display: flex; align-items: center; gap: 8px; }
-        .blink { width: 8px; height: 8px; background: currentColor; border-radius: 50%; animation: blink 2s infinite; } @keyframes blink { 0% {opacity:1} 50% {opacity:0.3} }
+        .header { padding: 18px 24px; background: rgba(5,5,5,0.9); position: sticky; top: 0; z-index: 99; border-bottom: var(--card-border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); }
+        .title { font-weight: 900; letter-spacing: 1.5px; font-size: 16px; color: #fff; text-transform: uppercase; }
+        .live-badge { font-size: 11px; font-weight: 700; color: var(--safe); background: rgba(50,215,75,0.1); padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(50,215,75,0.2); }
+        .blink { width: 6px; height: 6px; background: currentColor; border-radius: 50%; animation: blink 1.5s infinite; } @keyframes blink { 0% {opacity:1} 50% {opacity:0.3} }
 
-        /* 🔥 V36: 增加全局间距，让界面“呼吸” */
-        .container { padding: 24px; display: flex; flex-direction: column; gap: 24px; max-width: 600px; margin: 0 auto; }
+        .container { padding: 20px; display: flex; flex-direction: column; gap: 20px; max-width: 600px; margin: 0 auto; }
 
         /* 状态栏 */
-        .status-banner { background: #111; border: var(--card-border); border-radius: 16px; padding: 24px; position: relative; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.2); }
-        .status-label { font-size: 12px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; opacity: 0.8; }
-        .status-main { font-size: 32px; font-weight: 900; margin: 8px 0; letter-spacing: -0.5px; }
-        .status-desc { font-size: 13px; color: var(--sub); font-weight: 500; }
-        .status-bg-glow { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.08; pointer-events: none; mix-blend-mode: screen; }
+        .status-banner { background: #0a0a0a; border: var(--card-border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
+        .status-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--sub); }
+        .status-main { font-size: 28px; font-weight: 900; margin: 6px 0; letter-spacing: -0.5px; }
+        .status-desc { font-size: 12px; color: var(--sub); }
+        .status-bg-glow { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.05; pointer-events: none; }
         
         /* 仪表盘 */
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
-        .dash-card { background: var(--card-bg); border: var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: center; }
-        .dash-val { font-size: 30px; font-weight: 900; margin-top: 4px; }
-        .dash-lbl { font-size: 12px; color: var(--sub); font-weight: 700; letter-spacing: 0.5px; text-transform: uppercase; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        .dash-card { background: var(--card-bg); border: var(--card-border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: center; }
+        .dash-val { font-size: 26px; font-weight: 900; margin-top: 2px; }
+        .dash-lbl { font-size: 11px; color: var(--sub); font-weight: 700; text-transform: uppercase; }
 
-        /* 列表卡片 (优化间距) */
-        .card { background: var(--card-bg); border: var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; gap: 16px; position: relative; transition: transform 0.2s; }
-        .card.core { border-color: rgba(255, 69, 58, 0.5); box-shadow: 0 0 30px rgba(255, 69, 58, 0.1) inset; }
+        /* 卡片 */
+        .card { background: var(--card-bg); border: var(--card-border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; position: relative; }
+        .card.core { border-color: rgba(255, 69, 58, 0.4); box-shadow: 0 0 20px rgba(255, 69, 58, 0.05) inset; }
         
-        .tac-tag { position: absolute; top: 0; right: 0; font-size: 10px; font-weight: 900; padding: 4px 12px; border-bottom-left-radius: 12px; letter-spacing: 0.5px; }
-        .tag-red { background: rgba(255,69,58,0.2); color: var(--danger); }
-        .tag-blue { background: rgba(10,132,255,0.2); color: var(--blue); }
-        .tag-yellow { background: rgba(255,214,10,0.2); color: var(--warn); }
-        .tag-green { background: rgba(50,215,75,0.2); color: var(--safe); }
+        .tac-tag { position: absolute; top: 0; right: 0; font-size: 9px; font-weight: 900; padding: 3px 10px; border-bottom-left-radius: 10px; letter-spacing: 0.5px; }
+        .tag-red { background: rgba(255,69,58,0.15); color: var(--danger); border-left: 1px solid var(--danger); border-bottom: 1px solid var(--danger); }
+        .tag-blue { background: rgba(10,132,255,0.15); color: var(--blue); border-left: 1px solid var(--blue); border-bottom: 1px solid var(--blue); }
+        .tag-yellow { background: rgba(255,214,10,0.15); color: var(--warn); border-left: 1px solid var(--warn); border-bottom: 1px solid var(--warn); }
+        .tag-green { background: rgba(50,215,75,0.15); color: var(--safe); border-left: 1px solid var(--safe); border-bottom: 1px solid var(--safe); }
 
-        .row-top { display: flex; justify-content: space-between; align-items: flex-start; padding-right: 60px; }
-        .shop-name { font-size: 18px; font-weight: 900; color: #fff; margin-bottom: 4px; }
-        .shop-desc { font-size: 12px; color: var(--sub); font-weight: 500; }
-        .big-score { font-size: 36px; font-weight: 900; line-height: 1; }
+        .row-top { display: flex; justify-content: space-between; align-items: flex-start; padding-right: 50px; }
+        .shop-name { font-size: 16px; font-weight: 800; color: #eee; margin-bottom: 2px; }
+        .shop-desc { font-size: 11px; color: var(--sub); }
+        .big-score { font-size: 32px; font-weight: 900; line-height: 1; }
         
-        .row-stats { display: flex; gap: 15px; background: #0c0c0c; padding: 12px 16px; border-radius: 10px; border: var(--card-border); }
-        .stat-box { flex: 1; display: flex; flex-direction: column; gap: 2px; } 
-        .stat-val { font-size: 14px; font-weight: 700; font-family: 'JetBrains Mono', monospace; } 
-        .stat-lbl { font-size: 11px; color: #555; font-weight: 500; }
+        .row-stats { display: flex; gap: 12px; background: #050505; padding: 10px 12px; border-radius: 8px; border: var(--card-border); }
+        .stat-box { flex: 1; display: flex; flex-direction: column; } 
+        .stat-val { font-size: 13px; font-weight: 700; font-family: 'JetBrains Mono'; } 
+        .stat-lbl { font-size: 10px; color: #555; font-weight: 600; text-transform: uppercase; }
         
-        /* 🔥 V36: 大幅缩小迷你走势图 (Sparkline) */
-        .spark-container { 
-            display: flex; align-items: flex-end; gap: 3px; 
-            height: 14px; /* 从 24px 缩小到 14px */
-            margin-top: 4px; padding-top: 12px; 
-            border-top: 1px dashed #222; 
-            opacity: 0.8; /* 降低整体不透明度，让它更没存在感 */
+        .spark-container { display: flex; align-items: flex-end; gap: 2px; height: 12px; margin-top: 6px; padding-top: 8px; border-top: 1px dashed #222; opacity: 0.6; }
+        .spark-bar { flex: 1; background: #333; border-radius: 1px; min-height: 2px; }
+
+        /* 🔥 V37 军情电讯 (Military Intel) */
+        .news-head { font-size: 12px; font-weight: 900; color: #888; padding-bottom: 8px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #222; }
+        .news-icon { color: var(--danger); }
+        
+        .news-item { 
+            background: #0a0a0a; border: 1px solid #222; border-left: 2px solid var(--sub); 
+            padding: 14px; border-radius: 0 8px 8px 0; margin-bottom: 8px; 
+            display: flex; flex-direction: column; gap: 6px;
+            text-decoration: none; transition: all 0.2s; 
         }
-        .spark-bar { flex: 1; background: #2a2a2a; border-radius: 2px; min-height: 2px; transition: height 0.3s; }
-
-        /* 新闻模块 */
-        .news-head { font-size: 13px; font-weight: 900; color: #fff; padding-bottom: 10px; margin-bottom: 12px; display: flex; align-items: center; gap: 10px; letter-spacing: 1px; text-transform: uppercase; border-bottom: var(--card-border); }
-        .news-item { background: #111; border: var(--card-border); padding: 16px; border-radius: 12px; margin-bottom: 10px; display: block; text-decoration: none; transition: all 0.2s; }
-        .news-item:active { background: #1a1a1a; transform: scale(0.98); }
-        .news-meta { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--sub); margin-bottom: 6px; display: flex; justify-content: space-between; }
+        .news-item:active { background: #151515; border-left-color: #fff; }
+        
+        .news-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--sub); display: flex; justify-content: space-between; }
         .news-source { color: var(--blue); font-weight: 700; }
-        .news-title { color: #eee; font-size: 14px; font-weight: 700; line-height: 1.4; }
+        .news-title { color: #ddd; font-size: 13px; font-weight: 600; line-height: 1.4; }
 
-        /* 手册 & 矩阵 (增加留白) */
-        .manual { background: #0a0a0a; border: var(--card-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 30px; }
-        .man-head { font-size: 13px; font-weight: 900; color: #fff; border-bottom: var(--card-border); padding-bottom: 10px; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px; }
+        /* 手册 */
+        .manual { background: #0a0a0a; border: var(--card-border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 24px; }
+        .man-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .matrix-card { background: #111; border: var(--card-border); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
         
-        .man-row { display: flex; gap: 12px; align-items: flex-start; margin-bottom: 12px; font-size: 12px; color: var(--sub); line-height: 1.4; }
-        .man-badge { width: 54px; text-align: center; font-weight: 900; font-size: 10px; padding: 3px 0; border-radius: 6px; border: 2px solid; flex-shrink: 0; letter-spacing: 0.5px; }
+        .formula-row { display: flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: bold; flex-wrap: wrap; }
+        .f-tag { padding: 2px 6px; border-radius: 4px; border: 1px solid; }
+        .f-red { border-color: rgba(255,69,58,0.4); color: var(--danger); }
+        .f-gray { border-color: #333; color: #666; }
+        .f-green { border-color: rgba(50,215,75,0.4); color: var(--safe); }
         
-        .matrix-grid { display: grid; grid-template-columns: 1fr; gap: 12px; }
-        .matrix-card { 
-            background: #111; border: var(--card-border); border-radius: 10px; padding: 16px;
-            display: flex; flex-direction: column; gap: 10px;
-        }
+        .res-title { font-weight: 900; font-size: 12px; margin-top: 4px; }
+        .res-desc { font-size: 10px; color: var(--sub); }
         
-        .formula-row { display: flex; align-items: center; gap: 8px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: bold; }
-        .f-tag { padding: 4px 8px; border-radius: 6px; border: 1px solid; }
-        .f-red { background: rgba(255,69,58,0.1); color: var(--danger); border-color: rgba(255,69,58,0.3); }
-        .f-gray { background: #1a1a1a; color: #777; border-color: #333; }
-        .f-green { background: rgba(50,215,75,0.1); color: var(--safe); border-color: rgba(50,215,75,0.3); }
-        .f-plus { color: #444; font-size: 14px; }
-        
-        .res-title { font-weight: 900; font-size: 14px; margin-top: 4px; }
-        .res-desc { font-size: 11px; color: var(--sub); margin-top: 4px; font-weight: 500; }
-        
-        .loading, .empty-state { text-align: center; padding: 30px; color: var(--sub); font-size: 13px; font-weight: 500; background: #111; border-radius: 12px; border: var(--card-border); }
+        .loading, .empty-state { text-align: center; padding: 20px; color: var(--sub); font-size: 12px; background: #0a0a0a; border-radius: 8px; border: 1px dashed #333; }
     </style>
 </head>
 <body>
     <div class="header">
         <div class="title">五角大楼情报局</div>
-        <div class="live-badge"><div class="blink"></div>LIVE MONITORING</div>
+        <div class="live-badge"><div class="blink"></div>LIVE</div>
     </div>
 
     <div class="container">
-        <div id="status-area">
-            <div class="loading">正在评估战略态势...</div>
-        </div>
+        <div id="status-area"><div class="loading">正在评估态势...</div></div>
         
         <div id="dash-area"></div>
         
         <div>
-            <div class="news-head"><span>🍕</span> 实时热度监控 (LIVE HEATMAP)</div>
-            <div id="list-area">
-                <div class="loading">正在连接地面探针...</div>
-            </div>
+            <div class="news-head"><span class="news-icon">⚡</span> 军情电讯 (MILITARY INTEL)</div>
+            <div id="news-feed"><div class="loading">正在截获加密通讯...</div></div>
         </div>
-        
+
         <div>
-            <div class="news-head"><span>📰</span> 加密电讯 (NEWS WIRE)</div>
-            <div id="news-feed">
-                <div class="loading">正在截获通讯信号...</div>
-            </div>
+            <div class="news-head"><span>🍕</span> 地面热度监控</div>
+            <div id="list-area"><div class="loading">连接地面探针...</div></div>
         </div>
 
         <div class="manual">
-            <div>
-                <div class="man-head">📂 资产战术档案 (ASSETS PROFILES)</div>
-                <div class="man-row"><div class="man-badge" style="color:#ff453a; border-color:rgba(255,69,58,0.3)">CORE</div><div><strong style="color:#fff">特区披萨</strong>。<br>距离最近，最敏感的内部风向标。</div></div>
-                <div class="man-row"><div class="man-badge" style="color:#0a84ff; border-color:rgba(10,132,255,0.3)">SUPPLY</div><div><strong style="color:#fff">达美乐 / 棒约翰</strong>。<br>补给线。激增通常代表内部加班/禁足。</div></div>
-                <div class="man-row"><div class="man-badge" style="color:#ffd60a; border-color:rgba(255,214,10,0.3)">CROWD</div><div><strong style="color:#fff">Wiseguy</strong>。<br>商圈散客。激增代表公共/媒体事件。</div></div>
-                <div class="man-row"><div class="man-badge" style="color:#32d74b; border-color:rgba(50,215,75,0.3)">FLANK</div><div><strong style="color:#fff">We披萨</strong>。<br>侧翼对照组。用于排除“全区热闹”的干扰。</div></div>
-            </div>
-
-            <div>
-                <div class="man-head">🧠 联合情报矩阵 (TACTICAL MATRIX)</div>
-                <div class="matrix-grid">
-                    <div class="matrix-card" style="border-left: 4px solid var(--danger)">
-                        <div class="formula-row">
-                            <span class="f-tag f-red">SUPPLY 高</span> <span class="f-plus">+</span> <span class="f-tag f-gray">CORE 低</span>
-                        </div>
-                        <div>
-                            <div class="res-title" style="color:var(--danger)">🚨 内部封锁 (LOCKDOWN)</div>
-                            <div class="res-desc">人员无法外出，只能依赖外卖。最危险信号。</div>
-                        </div>
-                    </div>
-
-                    <div class="matrix-card" style="border-left: 4px solid var(--danger)">
-                        <div class="formula-row">
-                            <span class="f-tag f-red">CORE 高</span> <span class="f-plus">+</span> <span class="f-tag f-gray">FLANK 低</span>
-                        </div>
-                        <div>
-                            <div class="res-title" style="color:var(--danger)">🎯 确认行动 (CONFIRMED)</div>
-                            <div class="res-desc">仅五角大楼点位活跃，周边区域冷清。真实情报。</div>
-                        </div>
-                    </div>
-
-                    <div class="matrix-card" style="border-left: 4px solid var(--warn)">
-                        <div class="formula-row">
-                            <span class="f-tag f-red">CORE 高</span> <span class="f-plus">+</span> <span class="f-tag f-red" style="border-color:var(--warn);color:var(--warn);background:rgba(255,214,10,0.1)">CROWD 高</span>
-                        </div>
-                        <div>
-                            <div class="res-title" style="color:var(--warn)">📢 公共事件 (PUBLIC EVENT)</div>
-                            <div class="res-desc">媒体、游客或抗议人群聚集。非秘密行动。</div>
-                        </div>
-                    </div>
-
-                    <div class="matrix-card" style="border-left: 4px solid #fff">
-                        <div class="formula-row">
-                            <span class="f-tag f-red">CORE 高</span> <span class="f-plus">+</span> <span class="f-tag f-green">FLANK 高</span>
-                        </div>
-                        <div>
-                            <div class="res-title" style="color:#fff">🎉 虚假警报 (FALSE ALARM)</div>
-                            <div class="res-desc">全区都在过周末吃披萨，无战术价值。</div>
-                        </div>
-                    </div>
+            <div class="news-head"><span>🧠</span> 战术判读矩阵</div>
+            <div class="matrix-grid">
+                <div class="matrix-card" style="border-left: 3px solid var(--danger)">
+                    <div class="formula-row"><span class="f-tag f-red">SUPPLY 高</span>+<span class="f-tag f-gray">CORE 低</span></div>
+                    <div><div class="res-title" style="color:var(--danger)">🚨 内部封锁</div><div class="res-desc">只进不出，依赖外卖</div></div>
+                </div>
+                <div class="matrix-card" style="border-left: 3px solid var(--danger)">
+                    <div class="formula-row"><span class="f-tag f-red">CORE 高</span>+<span class="f-tag f-gray">FLANK 低</span></div>
+                    <div><div class="res-title" style="color:var(--danger)">🎯 确认行动</div><div class="res-desc">仅五角大楼活跃</div></div>
+                </div>
+                <div class="matrix-card" style="border-left: 3px solid var(--warn)">
+                    <div class="formula-row"><span class="f-tag f-red">CORE 高</span>+<span class="f-tag f-red" style="color:var(--warn);border-color:var(--warn)">CROWD 高</span></div>
+                    <div><div class="res-title" style="color:var(--warn)">📢 公共事件</div><div class="res-desc">媒体/游客聚集</div></div>
+                </div>
+                <div class="matrix-card" style="border-left: 3px solid #fff">
+                    <div class="formula-row"><span class="f-tag f-red">CORE 高</span>+<span class="f-tag f-green">FLANK 高</span></div>
+                    <div><div class="res-title" style="color:#fff">🎉 虚假警报</div><div class="res-desc">全区周末聚餐</div></div>
                 </div>
             </div>
         </div>
         
-        <div style="text-align:center; font-size:11px; color:var(--sub); margin-top:20px; font-weight:500;">PENTAGON OPS V36 // UI REFORGED</div>
+        <div style="text-align:center; font-size:10px; color:#333; margin-top:10px;">OPS V37 // TACTICAL FEED</div>
     </div>
 
     <script>
         const DICT = {
-            "District": { name: "特区披萨", desc: "核心指标 (首选)", tag: "CORE INTEL", cls: "tag-red", core: true },
-            "Domino":   { name: "达美乐",   desc: "后勤补给 (主)", tag: "SUPPLY LINE", cls: "tag-blue", core: false },
-            "Papa":     { name: "棒约翰",   desc: "后勤补给 (备)", tag: "SUPPLY LINE", cls: "tag-blue", core: false },
-            "Wiseguy":  { name: "Wiseguy",  desc: "人员聚集 (散)", tag: "CROWD INTEL", cls: "tag-yellow", core: false },
-            "We":       { name: "We披萨",   desc: "侧翼观察 (辅)", tag: "FLANK WATCH", cls: "tag-green", core: false }
+            "District": { name: "特区披萨", desc: "核心哨所", tag: "CORE", cls: "tag-red", core: true },
+            "Domino":   { name: "达美乐",   desc: "后勤补给", tag: "SUPPLY", cls: "tag-blue", core: false },
+            "Papa":     { name: "棒约翰",   desc: "后勤补给", tag: "SUPPLY", cls: "tag-blue", core: false },
+            "Wiseguy":  { name: "Wiseguy",  desc: "人员聚集", tag: "CROWD", cls: "tag-yellow", core: false },
+            "We":       { name: "We披萨",   desc: "侧翼观察", tag: "FLANK", cls: "tag-green", core: false }
         };
 
-        Papa.parse("pizza_data.csv", {
-            download: true, header: true, skipEmptyLines: true,
-            complete: function(res) { renderPizza(res.data); },
-            error: function() { 
-                document.getElementById('list-area').innerHTML = '<div class="empty-state">❌ 披萨探针离线<br><span style="font-size:11px;color:#555">无法连接地面数据源</span></div>';
-                document.getElementById('status-area').innerHTML = '<div class="status-banner" style="border-color:#333"><div class="status-label" style="color:#666">状态未知</div><div class="status-main" style="color:#888">OFFLINE</div><div class="status-desc">系统连接中断。</div></div>';
-            }
-        });
-
-        Papa.parse("pentagon_news.csv", {
-            download: true, header: true, skipEmptyLines: true,
-            complete: function(res) { renderNews(res.data); },
-            error: function() { document.getElementById('news-feed').innerHTML = '<div class="empty-state">📡 新闻信道静默</div>'; }
-        });
+        Papa.parse("pizza_data.csv", { download: true, header: true, skipEmptyLines: true, complete: res => renderPizza(res.data), error: () => document.getElementById('list-area').innerHTML='<div class="empty-state">❌ 探针离线</div>' });
+        Papa.parse("pentagon_news.csv", { download: true, header: true, skipEmptyLines: true, complete: res => renderNews(res.data), error: () => document.getElementById('news-feed').innerHTML='<div class="empty-state">📡 无信号</div>' });
 
         function renderNews(data) {
             const el = document.getElementById('news-feed');
-            if(!data || !data.length) { el.innerHTML = '<div class="empty-state">📡 暂无截获的通讯</div>'; return; }
+            if(!data || !data.length) { el.innerHTML = '<div class="empty-state">📡 暂无战术情报</div>'; return; }
             el.innerHTML = "";
             data.slice(0, 5).forEach(r => {
-                const time = r.Time || "--:--"; const src = r.Source || "Unknown"; const title = r.Title || "No Title"; const link = r.Link || "#";
+                const time = r.Time || "--:--"; const src = r.Source || "UNK"; const title = r.Title || "No Data"; const link = r.Link || "#";
                 el.innerHTML += `<a href="${link}" target="_blank" class="news-item"><div class="news-meta"><span>${time}</span><span class="news-source"> // ${src}</span></div><div class="news-title">${title}</div></a>`;
             });
         }
@@ -227,7 +166,7 @@
                 if(n.includes("District")) k="District"; else if(n.includes("Domino")) k="Domino";
                 else if(n.includes("Papa")) k="Papa"; else if(n.includes("Wiseguy")) k="Wiseguy";
                 else if(n.includes("We")) k="We";
-                if(k) { if(!groups[k]) groups[k]=[]; groups[k].push({p: parseInt(r['Live Popularity']||0), t: r['Timestamp (ET)'] || "00:00"}); }
+                if(k) { if(!groups[k]) groups[k]=[]; groups[k].push({p: parseInt(r['Live Popularity']||0), t: r['Timestamp (ET)']||"00:00"}); }
             });
 
             let total=0, diffTotal=0, corePop=0; const list = [];
@@ -240,14 +179,14 @@
             });
 
             list.sort((a,b) => {
-                const coreA = DICT[a.key].core; const coreB = DICT[b.key].core;
-                if(coreA === coreB) return b.curr.p - a.curr.p;
-                return coreA ? -1 : 1;
+                const cA = DICT[a.key].core; const cB = DICT[b.key].core;
+                if(cA===cB) return b.curr.p - a.curr.p;
+                return cA ? -1 : 1;
             });
 
-            let sTxt="平静 (NORMAL)", sDesc="五角大楼周边活动水平正常。", sCol="var(--safe)", sGlow="rgba(50,215,75,0.1)";
-            if(total > 150 || corePop > 80) { sTxt="紧急 (CRITICAL)"; sDesc="🚨 警告：检测到严重人员活动，建议研判。"; sCol="var(--danger)"; sGlow="rgba(255,69,58,0.2)"; } 
-            else if(total > 100 || corePop > 50) { sTxt="活跃 (ELEVATED)"; sDesc="⚠️ 注意：活动水平明显高于平时。"; sCol="var(--warn)"; sGlow="rgba(255,214,10,0.15)"; }
+            let sTxt="平静 (NORMAL)", sDesc="区域活动正常，无战术异常。", sCol="var(--safe)", sGlow="rgba(50,215,75,0.1)";
+            if(total > 150 || corePop > 80) { sTxt="紧急 (CRITICAL)"; sDesc="🚨 检测到严重活动峰值，请核对军情电讯。"; sCol="var(--danger)"; sGlow="rgba(255,69,58,0.2)"; }
+            else if(total > 100 || corePop > 50) { sTxt="活跃 (ELEVATED)"; sDesc="⚠️ 活动水平高于平时。"; sCol="var(--warn)"; sGlow="rgba(255,214,10,0.15)"; }
             
             document.getElementById('status-area').innerHTML = `<div class="status-banner" style="border-color:${sCol}"><div class="status-bg-glow" style="background:${sCol}; opacity:0.05"></div><div class="status-label" style="color:${sCol}">当前威胁等级</div><div class="status-main" style="color:${sCol}">${sTxt}</div><div class="status-desc">${sDesc}</div></div>`;
 
@@ -259,14 +198,13 @@
             list.forEach(i => {
                 const conf = DICT[i.key];
                 const dfCol = i.diff>0 ? "var(--danger)" : (i.diff<0 ? "var(--safe)" : "var(--sub)");
-                const dfSym = i.diff>0 ? "▲ +" : (i.diff<0 ? "▼ " : "");
+                const dfSym = i.diff>0 ? "▲" : (i.diff<0 ? "▼" : "");
                 const timeStr = i.curr.t.includes(" ") ? i.curr.t.split(" ")[1].substring(0,5) : i.curr.t;
-
+                
                 let bars = ""; const spark = i.hist.slice(-20);
                 spark.forEach((d,idx) => {
-                    const isLast = idx === spark.length-1;
+                    const isLast = idx===spark.length-1;
                     const h = Math.max(5, d.p);
-                    // 🔥 V36: 降低柱状图的视觉干扰，非当前时段用深灰色
                     const bg = isLast ? '#fff' : (d.p>50 ? '#ff453a' : '#333');
                     bars += `<div class="spark-bar" style="height:${h}%; background:${bg}; opacity:${isLast?1:0.7}"></div>`;
                 });
@@ -274,8 +212,8 @@
                 el.innerHTML += `<div class="card ${conf.core?'core':''}">
                     <div class="tac-tag ${conf.cls}">${conf.tag}</div>
                     <div class="row-top"><div><div class="shop-name">${conf.name}</div><div class="shop-desc">${conf.desc}</div></div><div class="big-score" style="color:${i.curr.p>50?'var(--danger)':'#fff'}">${i.curr.p}</div></div>
-                    <div class="row-stats"><div class="stat-box"><div class="stat-lbl">1H 变化</div><div class="stat-val" style="color:${dfCol}">${dfSym}${i.diff}</div></div><div class="stat-box" style="padding-left:16px; border-left:var(--card-border)"><div class="stat-lbl">更新于</div><div class="stat-val" style="color:var(--sub); font-family:'JetBrains Mono'">${timeStr}</div></div></div>
-                    <div class="spark-container" style="height:14px; margin-top:12px; opacity:0.8">${bars}</div>
+                    <div class="row-stats"><div class="stat-box"><div class="stat-lbl">1H 变化</div><div class="stat-val" style="color:${dfCol}">${dfSym} ${i.diff}</div></div><div class="stat-box" style="padding-left:12px; border-left:1px solid #222"><div class="stat-lbl">更新于</div><div class="stat-val" style="color:var(--sub)">${timeStr}</div></div></div>
+                    <div class="spark-container">${bars}</div>
                 </div>`;
             });
         }
