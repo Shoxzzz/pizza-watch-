@@ -14,12 +14,20 @@
         }
         body { background: var(--bg); color: var(--text); font-family: 'Noto Sans SC', sans-serif; margin: 0; padding: 0; padding-bottom: 120px; line-height: 1.6; }
         
-        .header { padding: 20px 24px; background: rgba(5,5,5,0.9); position: sticky; top: 0; z-index: 99; border-bottom: var(--card-border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); }
+        .header { padding: 20px 24px; background: rgba(5,5,5,0.95); position: sticky; top: 0; z-index: 99; border-bottom: var(--card-border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); }
         .title { font-weight: 900; letter-spacing: 2px; font-size: 16px; color: #fff; text-transform: uppercase; }
         .live-badge { font-size: 11px; font-weight: 700; color: var(--safe); background: rgba(50,215,75,0.1); padding: 5px 10px; border-radius: 4px; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(50,215,75,0.2); }
         .blink { width: 6px; height: 6px; background: currentColor; border-radius: 50%; animation: blink 1.5s infinite; } @keyframes blink { 0% {opacity:1} 50% {opacity:0.3} }
 
-        .container { padding: 24px; display: flex; flex-direction: column; gap: 32px; max-width: 600px; margin: 0 auto; }
+        /* 🔥 V40 改动：全局大间距 */
+        .container { 
+            padding: 24px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 40px; /* 板块之间拉开 40px */
+            max-width: 600px; 
+            margin: 0 auto; 
+        }
 
         /* 状态栏 */
         .status-banner { background: #0a0a0a; border: var(--card-border); border-radius: 16px; padding: 24px; position: relative; overflow: hidden; }
@@ -34,15 +42,22 @@
         .dash-val { font-size: 32px; font-weight: 900; margin-top: 4px; }
         .dash-lbl { font-size: 11px; color: var(--sub); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* 🔥 V39: 披萨卡片 - 宽体改造 */
+        /* 🔥 V40 改动：披萨列表容器 - 强制拉开卡片间距 */
+        #list-area {
+            display: flex;
+            flex-direction: column;
+            gap: 30px; /* 卡片与卡片之间 30px */
+        }
+
         .card { 
             background: var(--card-bg); 
             border: var(--card-border); 
-            border-radius: 20px; /* 圆角加大 */
-            padding: 28px;       /* 内边距暴力加大 */
+            border-radius: 20px; 
+            padding: 28px;       
             display: flex; flex-direction: column; 
-            gap: 24px;           /* 内部元素垂直间距加大 */
+            gap: 24px;           
             position: relative; 
+            box-shadow: 0 4px 20px rgba(0,0,0,0.2); /* 增加一点阴影增加层次感 */
         }
         .card.core { border-color: rgba(255, 69, 58, 0.4); box-shadow: 0 0 50px rgba(255, 69, 58, 0.05) inset; }
         
@@ -57,26 +72,22 @@
         .tag-yellow { background: rgba(255,214,10,0.15); color: var(--warn); border-left: 1px solid var(--warn); border-bottom: 1px solid var(--warn); }
         .tag-green { background: rgba(50,215,75,0.15); color: var(--safe); border-left: 1px solid var(--safe); border-bottom: 1px solid var(--safe); }
 
-        /* 第一层：标题区 */
         .row-top { display: flex; justify-content: space-between; align-items: flex-start; padding-right: 30px; }
         .shop-name { font-size: 22px; font-weight: 900; color: #fff; margin-bottom: 8px; letter-spacing: 0.5px; display: block; }
         .shop-desc { font-size: 13px; color: var(--sub); font-weight: 500; }
-        .big-score { font-size: 48px; font-weight: 900; line-height: 1; letter-spacing: -2px; } /* 分数巨大化 */
+        .big-score { font-size: 48px; font-weight: 900; line-height: 1; letter-spacing: -2px; }
         
-        /* 第二层：数据盒 (独立大方块) */
         .row-stats { 
             display: flex; gap: 30px; 
             background: #080808; 
-            padding: 20px 24px; /* 内部也很宽敞 */
+            padding: 20px 24px; 
             border-radius: 14px; 
             border: var(--card-border); 
-            margin: 5px 0; /* 上下留出物理隔离 */
         }
         .stat-box { flex: 1; display: flex; flex-direction: column; gap: 6px; } 
         .stat-val { font-size: 16px; font-weight: 700; font-family: 'JetBrains Mono'; color: #eee; } 
         .stat-lbl { font-size: 11px; color: #555; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; }
         
-        /* 第三层：走势图 */
         .spark-container { 
             display: flex; align-items: flex-end; gap: 4px; 
             height: 18px; 
@@ -85,10 +96,16 @@
         }
         .spark-bar { flex: 1; background: #333; border-radius: 2px; min-height: 3px; }
 
-        /* 新闻 */
-        .news-head { font-size: 12px; font-weight: 900; color: #888; padding-bottom: 12px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; letter-spacing: 1.5px; text-transform: uppercase; border-bottom: 1px solid #222; }
+        /* 🔥 V40 改动：新闻列表容器 */
+        #news-feed {
+            display: flex;
+            flex-direction: column;
+            gap: 16px; /* 新闻之间拉开 16px */
+        }
+        
+        .news-head { font-size: 12px; font-weight: 900; color: #888; padding-bottom: 12px; margin-bottom: 20px; display: flex; align-items: center; gap: 10px; letter-spacing: 1.5px; text-transform: uppercase; border-bottom: 1px solid #222; }
         .news-icon { color: var(--danger); }
-        .news-item { background: #0a0a0a; border: 1px solid #222; border-left: 2px solid var(--sub); padding: 18px; border-radius: 0 10px 10px 0; margin-bottom: 12px; display: flex; flex-direction: column; gap: 8px; text-decoration: none; transition: all 0.2s; }
+        .news-item { background: #0a0a0a; border: 1px solid #222; border-left: 2px solid var(--sub); padding: 18px; border-radius: 0 10px 10px 0; display: flex; flex-direction: column; gap: 8px; text-decoration: none; transition: all 0.2s; }
         .news-item:active { background: #151515; border-left-color: #fff; }
         .news-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--sub); display: flex; justify-content: space-between; }
         .news-source { color: var(--blue); font-weight: 700; }
@@ -153,7 +170,7 @@
             </div>
         </div>
         
-        <div style="text-align:center; font-size:10px; color:#333; margin-top:20px;">OPS V39 // WIDE BODY</div>
+        <div style="text-align:center; font-size:10px; color:#333; margin-top:20px;">OPS V40 // SOCIAL DISTANCING</div>
     </div>
 
     <script>
@@ -229,7 +246,6 @@
                     bars += `<div class="spark-bar" style="height:${h}%; background:${bg}; opacity:${isLast?1:0.7}"></div>`;
                 });
 
-                // 🔥 V39: 宽体卡片结构
                 el.innerHTML += `<div class="card ${conf.core?'core':''}">
                     <div class="tac-tag ${conf.cls}">${conf.tag}</div>
                     
