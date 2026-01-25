@@ -12,82 +12,107 @@
             --danger: #ff453a; --warn: #ffd60a; --safe: #32d74b; --blue: #0a84ff;
             --card-border: 1px solid #222;
         }
-        body { background: var(--bg); color: var(--text); font-family: 'Noto Sans SC', sans-serif; margin: 0; padding: 0; padding-bottom: 100px; line-height: 1.5; }
+        body { background: var(--bg); color: var(--text); font-family: 'Noto Sans SC', sans-serif; margin: 0; padding: 0; padding-bottom: 120px; line-height: 1.6; }
         
-        .header { padding: 18px 24px; background: rgba(5,5,5,0.9); position: sticky; top: 0; z-index: 99; border-bottom: var(--card-border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); }
-        .title { font-weight: 900; letter-spacing: 1.5px; font-size: 16px; color: #fff; text-transform: uppercase; }
-        .live-badge { font-size: 11px; font-weight: 700; color: var(--safe); background: rgba(50,215,75,0.1); padding: 4px 8px; border-radius: 4px; display: flex; align-items: center; gap: 6px; border: 1px solid rgba(50,215,75,0.2); }
+        .header { padding: 20px 24px; background: rgba(5,5,5,0.9); position: sticky; top: 0; z-index: 99; border-bottom: var(--card-border); display: flex; justify-content: space-between; align-items: center; backdrop-filter: blur(20px); }
+        .title { font-weight: 900; letter-spacing: 2px; font-size: 16px; color: #fff; text-transform: uppercase; }
+        .live-badge { font-size: 11px; font-weight: 700; color: var(--safe); background: rgba(50,215,75,0.1); padding: 5px 10px; border-radius: 4px; display: flex; align-items: center; gap: 8px; border: 1px solid rgba(50,215,75,0.2); }
         .blink { width: 6px; height: 6px; background: currentColor; border-radius: 50%; animation: blink 1.5s infinite; } @keyframes blink { 0% {opacity:1} 50% {opacity:0.3} }
 
-        .container { padding: 20px; display: flex; flex-direction: column; gap: 20px; max-width: 600px; margin: 0 auto; }
+        /* 🔥 V38: 增加容器间距 */
+        .container { padding: 24px; display: flex; flex-direction: column; gap: 30px; max-width: 600px; margin: 0 auto; }
 
         /* 状态栏 */
-        .status-banner { background: #0a0a0a; border: var(--card-border); border-radius: 12px; padding: 20px; position: relative; overflow: hidden; }
-        .status-label { font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--sub); }
-        .status-main { font-size: 28px; font-weight: 900; margin: 6px 0; letter-spacing: -0.5px; }
-        .status-desc { font-size: 12px; color: var(--sub); }
+        .status-banner { background: #0a0a0a; border: var(--card-border); border-radius: 16px; padding: 24px; position: relative; overflow: hidden; }
+        .status-label { font-size: 11px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--sub); margin-bottom: 8px; }
+        .status-main { font-size: 32px; font-weight: 900; margin: 8px 0; letter-spacing: -0.5px; line-height: 1.2; }
+        .status-desc { font-size: 13px; color: var(--sub); }
         .status-bg-glow { position: absolute; top: 0; left: 0; width: 100%; height: 100%; opacity: 0.05; pointer-events: none; }
         
         /* 仪表盘 */
-        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .dash-card { background: var(--card-bg); border: var(--card-border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; justify-content: center; }
-        .dash-val { font-size: 26px; font-weight: 900; margin-top: 2px; }
-        .dash-lbl { font-size: 11px; color: var(--sub); font-weight: 700; text-transform: uppercase; }
+        .dashboard-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .dash-card { background: var(--card-bg); border: var(--card-border); border-radius: 16px; padding: 20px; display: flex; flex-direction: column; justify-content: center; height: 100px; }
+        .dash-val { font-size: 32px; font-weight: 900; margin-top: 4px; }
+        .dash-lbl { font-size: 11px; color: var(--sub); font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
 
-        /* 卡片 */
-        .card { background: var(--card-bg); border: var(--card-border); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; position: relative; }
-        .card.core { border-color: rgba(255, 69, 58, 0.4); box-shadow: 0 0 20px rgba(255, 69, 58, 0.05) inset; }
+        /* 🔥 V38: 卡片完全重构 - 增加呼吸感 */
+        .card { 
+            background: var(--card-bg); border: var(--card-border); border-radius: 16px; 
+            padding: 24px; /* 增加内边距 */
+            display: flex; flex-direction: column; 
+            gap: 20px; /* 增加内部元素间距 */
+            position: relative; 
+        }
+        .card.core { border-color: rgba(255, 69, 58, 0.4); box-shadow: 0 0 40px rgba(255, 69, 58, 0.08) inset; }
         
-        .tac-tag { position: absolute; top: 0; right: 0; font-size: 9px; font-weight: 900; padding: 3px 10px; border-bottom-left-radius: 10px; letter-spacing: 0.5px; }
+        .tac-tag { 
+            position: absolute; top: 0; right: 0; 
+            font-size: 10px; font-weight: 900; 
+            padding: 5px 14px; border-bottom-left-radius: 14px; 
+            letter-spacing: 1px; 
+        }
         .tag-red { background: rgba(255,69,58,0.15); color: var(--danger); border-left: 1px solid var(--danger); border-bottom: 1px solid var(--danger); }
         .tag-blue { background: rgba(10,132,255,0.15); color: var(--blue); border-left: 1px solid var(--blue); border-bottom: 1px solid var(--blue); }
         .tag-yellow { background: rgba(255,214,10,0.15); color: var(--warn); border-left: 1px solid var(--warn); border-bottom: 1px solid var(--warn); }
         .tag-green { background: rgba(50,215,75,0.15); color: var(--safe); border-left: 1px solid var(--safe); border-bottom: 1px solid var(--safe); }
 
-        .row-top { display: flex; justify-content: space-between; align-items: flex-start; padding-right: 50px; }
-        .shop-name { font-size: 16px; font-weight: 800; color: #eee; margin-bottom: 2px; }
-        .shop-desc { font-size: 11px; color: var(--sub); }
-        .big-score { font-size: 32px; font-weight: 900; line-height: 1; }
+        .row-top { display: flex; justify-content: space-between; align-items: flex-start; padding-right: 20px; margin-top: 5px; }
+        .shop-name { font-size: 18px; font-weight: 800; color: #eee; margin-bottom: 6px; letter-spacing: 0.5px; }
+        .shop-desc { font-size: 12px; color: var(--sub); }
+        .big-score { font-size: 36px; font-weight: 900; line-height: 1; letter-spacing: -1px; }
         
-        .row-stats { display: flex; gap: 12px; background: #050505; padding: 10px 12px; border-radius: 8px; border: var(--card-border); }
-        .stat-box { flex: 1; display: flex; flex-direction: column; } 
-        .stat-val { font-size: 13px; font-weight: 700; font-family: 'JetBrains Mono'; } 
-        .stat-lbl { font-size: 10px; color: #555; font-weight: 600; text-transform: uppercase; }
+        /* 中间的数据盒 */
+        .row-stats { 
+            display: flex; gap: 20px; 
+            background: #080808; 
+            padding: 16px 20px; /* 更大的内边距 */
+            border-radius: 12px; 
+            border: var(--card-border); 
+        }
+        .stat-box { flex: 1; display: flex; flex-direction: column; gap: 4px; } 
+        .stat-val { font-size: 14px; font-weight: 700; font-family: 'JetBrains Mono'; } 
+        .stat-lbl { font-size: 10px; color: #555; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; }
         
-        .spark-container { display: flex; align-items: flex-end; gap: 2px; height: 12px; margin-top: 6px; padding-top: 8px; border-top: 1px dashed #222; opacity: 0.6; }
+        .spark-container { 
+            display: flex; align-items: flex-end; gap: 3px; 
+            height: 14px; /* 保持迷你 */
+            padding-top: 10px; border-top: 1px dashed #222; opacity: 0.7; 
+        }
         .spark-bar { flex: 1; background: #333; border-radius: 1px; min-height: 2px; }
 
-        /* 🔥 V37 军情电讯 (Military Intel) */
-        .news-head { font-size: 12px; font-weight: 900; color: #888; padding-bottom: 8px; margin-bottom: 12px; display: flex; align-items: center; gap: 8px; letter-spacing: 1px; text-transform: uppercase; border-bottom: 1px solid #222; }
+        /* 新闻 */
+        .news-head { font-size: 12px; font-weight: 900; color: #888; padding-bottom: 12px; margin-bottom: 16px; display: flex; align-items: center; gap: 10px; letter-spacing: 1.5px; text-transform: uppercase; border-bottom: 1px solid #222; }
         .news-icon { color: var(--danger); }
         
         .news-item { 
             background: #0a0a0a; border: 1px solid #222; border-left: 2px solid var(--sub); 
-            padding: 14px; border-radius: 0 8px 8px 0; margin-bottom: 8px; 
-            display: flex; flex-direction: column; gap: 6px;
+            padding: 18px; /* 增加新闻卡片间距 */
+            border-radius: 0 10px 10px 0; margin-bottom: 12px; 
+            display: flex; flex-direction: column; gap: 8px;
             text-decoration: none; transition: all 0.2s; 
         }
         .news-item:active { background: #151515; border-left-color: #fff; }
         
         .news-meta { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--sub); display: flex; justify-content: space-between; }
         .news-source { color: var(--blue); font-weight: 700; }
-        .news-title { color: #ddd; font-size: 13px; font-weight: 600; line-height: 1.4; }
+        .news-title { color: #ddd; font-size: 14px; font-weight: 600; line-height: 1.5; }
 
-        /* 手册 */
-        .manual { background: #0a0a0a; border: var(--card-border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; gap: 24px; }
-        .man-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .matrix-card { background: #111; border: var(--card-border); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; gap: 6px; }
+        /* 矩阵 */
+        .manual { background: #0a0a0a; border: var(--card-border); border-radius: 16px; padding: 24px; display: flex; flex-direction: column; gap: 24px; }
+        .man-grid { display: grid; grid-template-columns: 1fr; gap: 12px; } /* 改为单列显示，增加空间 */
+        .matrix-card { background: #111; border: var(--card-border); border-radius: 10px; padding: 16px; display: flex; align-items: center; justify-content: space-between; gap: 10px; }
         
-        .formula-row { display: flex; align-items: center; gap: 4px; font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: bold; flex-wrap: wrap; }
-        .f-tag { padding: 2px 6px; border-radius: 4px; border: 1px solid; }
+        .formula-row { display: flex; align-items: center; gap: 6px; font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: bold; }
+        .f-tag { padding: 4px 8px; border-radius: 6px; border: 1px solid; }
         .f-red { border-color: rgba(255,69,58,0.4); color: var(--danger); }
         .f-gray { border-color: #333; color: #666; }
         .f-green { border-color: rgba(50,215,75,0.4); color: var(--safe); }
         
-        .res-title { font-weight: 900; font-size: 12px; margin-top: 4px; }
-        .res-desc { font-size: 10px; color: var(--sub); }
+        .res-box { text-align: right; }
+        .res-title { font-weight: 900; font-size: 13px; }
+        .res-desc { font-size: 10px; color: var(--sub); margin-top: 2px; }
         
-        .loading, .empty-state { text-align: center; padding: 20px; color: var(--sub); font-size: 12px; background: #0a0a0a; border-radius: 8px; border: 1px dashed #333; }
+        .loading, .empty-state { text-align: center; padding: 40px; color: var(--sub); font-size: 12px; background: #0a0a0a; border-radius: 12px; border: 1px dashed #333; }
     </style>
 </head>
 <body>
@@ -113,27 +138,27 @@
 
         <div class="manual">
             <div class="news-head"><span>🧠</span> 战术判读矩阵</div>
-            <div class="matrix-grid">
-                <div class="matrix-card" style="border-left: 3px solid var(--danger)">
+            <div class="man-grid">
+                <div class="matrix-card" style="border-left: 4px solid var(--danger)">
                     <div class="formula-row"><span class="f-tag f-red">SUPPLY 高</span>+<span class="f-tag f-gray">CORE 低</span></div>
-                    <div><div class="res-title" style="color:var(--danger)">🚨 内部封锁</div><div class="res-desc">只进不出，依赖外卖</div></div>
+                    <div class="res-box"><div class="res-title" style="color:var(--danger)">🚨 内部封锁</div><div class="res-desc">只进不出 (点外卖)</div></div>
                 </div>
-                <div class="matrix-card" style="border-left: 3px solid var(--danger)">
+                <div class="matrix-card" style="border-left: 4px solid var(--danger)">
                     <div class="formula-row"><span class="f-tag f-red">CORE 高</span>+<span class="f-tag f-gray">FLANK 低</span></div>
-                    <div><div class="res-title" style="color:var(--danger)">🎯 确认行动</div><div class="res-desc">仅五角大楼活跃</div></div>
+                    <div class="res-box"><div class="res-title" style="color:var(--danger)">🎯 确认行动</div><div class="res-desc">仅五角大楼活跃</div></div>
                 </div>
-                <div class="matrix-card" style="border-left: 3px solid var(--warn)">
+                <div class="matrix-card" style="border-left: 4px solid var(--warn)">
                     <div class="formula-row"><span class="f-tag f-red">CORE 高</span>+<span class="f-tag f-red" style="color:var(--warn);border-color:var(--warn)">CROWD 高</span></div>
-                    <div><div class="res-title" style="color:var(--warn)">📢 公共事件</div><div class="res-desc">媒体/游客聚集</div></div>
+                    <div class="res-box"><div class="res-title" style="color:var(--warn)">📢 公共事件</div><div class="res-desc">媒体/游客聚集</div></div>
                 </div>
-                <div class="matrix-card" style="border-left: 3px solid #fff">
+                <div class="matrix-card" style="border-left: 4px solid #fff">
                     <div class="formula-row"><span class="f-tag f-red">CORE 高</span>+<span class="f-tag f-green">FLANK 高</span></div>
-                    <div><div class="res-title" style="color:#fff">🎉 虚假警报</div><div class="res-desc">全区周末聚餐</div></div>
+                    <div class="res-box"><div class="res-title" style="color:#fff">🎉 虚假警报</div><div class="res-desc">全区周末聚餐</div></div>
                 </div>
             </div>
         </div>
         
-        <div style="text-align:center; font-size:10px; color:#333; margin-top:10px;">OPS V37 // TACTICAL FEED</div>
+        <div style="text-align:center; font-size:10px; color:#333; margin-top:20px;">OPS V38 // SPACIOUS LAYOUT</div>
     </div>
 
     <script>
@@ -212,7 +237,7 @@
                 el.innerHTML += `<div class="card ${conf.core?'core':''}">
                     <div class="tac-tag ${conf.cls}">${conf.tag}</div>
                     <div class="row-top"><div><div class="shop-name">${conf.name}</div><div class="shop-desc">${conf.desc}</div></div><div class="big-score" style="color:${i.curr.p>50?'var(--danger)':'#fff'}">${i.curr.p}</div></div>
-                    <div class="row-stats"><div class="stat-box"><div class="stat-lbl">1H 变化</div><div class="stat-val" style="color:${dfCol}">${dfSym} ${i.diff}</div></div><div class="stat-box" style="padding-left:12px; border-left:1px solid #222"><div class="stat-lbl">更新于</div><div class="stat-val" style="color:var(--sub)">${timeStr}</div></div></div>
+                    <div class="row-stats"><div class="stat-box"><div class="stat-lbl">1H 变化</div><div class="stat-val" style="color:${dfCol}">${dfSym} ${i.diff}</div></div><div class="stat-box" style="padding-left:16px; border-left:1px solid #333"><div class="stat-lbl">更新于</div><div class="stat-val" style="color:var(--sub)">${timeStr}</div></div></div>
                     <div class="spark-container">${bars}</div>
                 </div>`;
             });
